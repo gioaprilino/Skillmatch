@@ -1,0 +1,506 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  WORKER
+  EMPLOYER
+  ADMIN
+  VERIFIER
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  FILLED
+}
+
+enum ApplicationStatus {
+  APPLIED
+  SCREENING
+  INTERVIEW
+  OFFERED
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum WorkType {
+  ONSITE
+  HYBRID
+  REMOTE
+}
+
+enum SalaryPeriod {
+  HOURLY
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum ContractType {
+  FIXED_TERM
+  PERMANENT
+  SEASONAL
+  PROJECT_BASED
+  APPRENTICESHIP
+}
+
+enum SkillCategory {
+  DOMESTIC_CARE
+  CONSTRUCTION
+  MANUFACTURING
+  AGRICULTURE
+  HOSPITALITY
+  MARITIME
+  PLANTATION
+  DRIVING
+  BEAUTY_WELLNESS
+  DIGITAL_BASIC
+  LANGUAGE
+  ENTREPRENEURSHIP
+  FINANCIAL_LITERACY
+  MIGRATION_RIGHTS
+}
+
+enum NotificationType {
+  JOB_MATCH
+  APPLICATION_UPDATE
+  ASSESSMENT_RESULT
+  CERTIFICATION_ISSUED
+  CONTRACT_EXPIRY
+  VISA_EXPIRY
+  PASSPORT_EXPIRY
+  REMINDER
+  SYSTEM
+  PROMOTION
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  phone         String?   @unique
+  passwordHash  String?
+  role          UserRole  @default(WORKER)
+  name          String
+  avatar        String?
+  nationality   String?   @default("IDN")
+  language      String    @default("id")
+
+  dateOfBirth   DateTime?
+  gender        String?
+  address       String?
+  province      String?
+  city          String?
+  emergencyContact Json?
+
+  passportNumber    String?   @unique
+  passportExpiry    DateTime?
+  visaType          String?
+  visaExpiry        DateTime?
+  currentCountry    String?
+  preferredCountries String[]
+  expectedSalaryMin Int?
+  expectedSalaryMax Int?
+  availabilityDate  DateTime?
+
+  companyName       String?
+  companyWebsite    String?
+  companySize       String?
+  companyDescription String?
+  verificationStatus VerificationStatus @default(PENDING)
+  verifiedAt        DateTime?
+  verifiedBy        String?
+
+  isActive       Boolean   @default(true)
+  emailVerified  DateTime?
+  phoneVerified  DateTime?
+  lastLoginAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  skills               UserSkill[]
+  certifications       Certification[]
+  applications         JobApplication[]
+  savedJobs            SavedJob[]
+  jobPosts             JobPost[]          @relation("EmployerJobs")
+  assessments          AssessmentAttempt[]
+  verifiableCreds      VerifiableCredential[]
+  notifications        Notification[]
+  sessions             Session[]
+  accounts             Account[]
+  employerReviews      CompanyReview[]    @relation("CompanyReviewEmployer")
+  userReviews          CompanyReview[]    @relation("CompanyReviewUser")
+  migrationChecklists  MigrationChecklist[] @relation("UserMigrationChecklists")
+  financialPlan        FinancialPlan?     @relation("UserFinancialPlan")
+
+  @@index([role])
+  @@index([currentCountry])
+  @@index([preferredCountries])
+}
+
+model Skill {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  nameEn      String
+  category    SkillCategory
+  description String?
+  icon        String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userSkills     UserSkill[]
+  jobSkills      JobSkill[]
+  assessments    Assessment[]
+  certifications Certification[] @relation("SkillCertifications")
+
+  @@index([category])
+}
+
+model UserSkill {
+  id            String     @id @default(cuid())
+  userId        String
+  skillId       String
+  level         SkillLevel @default(BEGINNER)
+  yearsExp      Float      @default(0)
+  selfAssessed  Boolean    @default(true)
+  verified      Boolean    @default(false)
+  verifiedAt    DateTime?
+  verifiedBy    String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId])
+  @@index([userId])
+  @@index([skillId])
+}
+
+model Assessment {
+  id          String   @id @default(cuid())
+  skillId     String
+  title       String
+  description String
+  durationMin Int      @default(30)
+  passingScore Int     @default(70)
+  questions   Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  skill      Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  attempts   AssessmentAttempt[]
+
+  @@index([skillId])
+}
+
+model AssessmentAttempt {
+  id            String   @id @default(cuid())
+  userId        String
+  assessmentId  String
+  score         Int
+  answers       Json
+  passed        Boolean
+  startedAt     DateTime @default(now())
+  completedAt   DateTime?
+  ipAddress     String?
+  userAgent     String?
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([assessmentId])
+}
+
+model Certification {
+  id              String   @id @default(cuid())
+  userId          String
+  skillId         String
+  issuer          String
+  credentialId    String   @unique
+  credentialType  String   @default("VerifiableCredential")
+  level           SkillLevel
+  issuedAt        DateTime @default(now())
+  expiresAt       DateTime?
+  status          VerificationStatus @default(VERIFIED)
+  vcData          Json
+  vcProof         Json?
+  ipfsHash        String?
+  blockchainTx    String?
+  revokedAt       DateTime?
+  revokedReason   String?
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation("SkillCertifications", fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([credentialId])
+  @@index([issuer])
+  @@index([status])
+}
+
+model VerifiableCredential {
+  id        String   @id @default(cuid())
+  userId    String
+  vcType    String
+  vcJson    Json
+  vcJwt     String?
+  ipfsHash  String?  @unique
+  issuedAt  DateTime @default(now())
+  expiresAt DateTime?
+  revoked   Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([vcType])
+}
+
+model JobPost {
+  id              String     @id @default(cuid())
+  employerId      String
+  title           String
+  description     String
+  requirements    Json
+  responsibilities Json
+  benefits        Json
+
+  country         String
+  province        String?
+  city            String?
+  workType        WorkType   @default(ONSITE)
+  address         String?
+
+  salaryMin       Int
+  salaryMax       Int
+  salaryCurrency  String     @default("IDR")
+  salaryPeriod    SalaryPeriod @default(MONTHLY)
+  overtimePolicy  String?
+
+  contractType    ContractType @default(FIXED_TERM)
+  contractDurationMonths Int?
+  probationMonths Int        @default(3)
+
+  minAge          Int?
+  maxAge          Int?
+  gender          String?
+  educationMin    String?
+  languageReq     Json?
+  passportRequired Boolean   @default(true)
+  visaProvided    Boolean    @default(false)
+  medicalCheckRequired Boolean @default(true)
+
+  status          JobStatus  @default(DRAFT)
+  viewCount       Int        @default(0)
+  applicationCount Int       @default(0)
+  publishedAt     DateTime?
+  expiresAt       DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  employer   User       @relation("EmployerJobs", fields: [employerId], references: [id], onDelete: Cascade)
+  skills     JobSkill[]
+  applications JobApplication[]
+  savedBy    SavedJob[]
+
+  @@index([employerId])
+  @@index([country, status])
+  @@index([status, publishedAt])
+  @@index([contractType])
+}
+
+model JobSkill {
+  id        String     @id @default(cuid())
+  jobId     String
+  skillId   String
+  level     SkillLevel
+  mandatory Boolean    @default(true)
+  weight    Int        @default(100)
+
+  job   JobPost @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  skill Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, skillId])
+}
+
+model JobApplication {
+  id              String             @id @default(cuid())
+  jobId           String
+  userId          String
+  status          ApplicationStatus  @default(APPLIED)
+  coverLetter     String?
+  cvUrl           String?
+  expectedSalary  Int?
+  availabilityDate DateTime?
+  matchScore      Float?
+  matchedSkills   Json?
+  appliedAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  reviewedAt      DateTime?
+  reviewedBy      String?
+  notes           String?
+
+  job JobPost @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, userId])
+  @@index([userId])
+  @@index([jobId])
+  @@index([status])
+  @@index([matchScore])
+}
+
+model SavedJob {
+  id        String   @id @default(cuid())
+  userId    String
+  jobId     String
+  createdAt DateTime @default(now())
+
+  user User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job  JobPost @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  read      Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+model CompanyReview {
+  id        String   @id @default(cuid())
+  employerId String
+  userId    String
+  rating    Int
+  title     String
+  content   String
+  pros      String?
+  cons      String?
+  verified  Boolean  @default(false)
+  anonymous Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employer User @relation("CompanyReviewEmployer", fields: [employerId], references: [id], onDelete: Cascade)
+  user     User @relation("CompanyReviewUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([employerId, userId])
+  @@index([employerId])
+}
+
+model MigrationChecklist {
+  id          String   @id @default(cuid())
+  userId      String
+  country     String
+  items       Json
+  progress    Int      @default(0)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation("UserMigrationChecklists", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, country])
+}
+
+model FinancialPlan {
+  id            String   @id @default(cuid())
+  userId        String
+  monthlyIncome Int
+  monthlyExpense Json
+  remittancePlan Json
+  savingsGoal   Json
+  investments   Json
+  insurance     Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation("UserFinancialPlan", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+}
+
+model CredentialVerification {
+  id            String   @id @default(cuid())
+  credentialId  String
+  verifierId    String
+  verifiedAt    DateTime @default(now())
+  result        String
+  notes         String?
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
