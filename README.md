@@ -1,329 +1,235 @@
-# SkillMatch - Platform Upskilling & Lowongan Kerja untuk TKI
+# SkillMatch
 
-> **International Web Technology Competition (IWTC) 2026 Entry**
-> Theme: "Innovating for a Sustainable Future: Empowering Communities through Web Technology"
+SkillMatch is a full-stack workforce platform for Indonesian migrant workers and employers. It combines skills-based upskilling, verifiable credentials, job matching, migration guidance, and financial literacy in one application.
 
-## 🎯 Project Overview
+The app is built with Next.js, Prisma, PostgreSQL, and NextAuth, and is designed for real-world labor-market support for workers seeking overseas employment opportunities while staying informed, protected, and competitive.
 
-SkillMatch adalah platform terintegrasi yang memberdayakan TKI (Tenaga Kerja Indonesia) dan PMI (Pekerja Migran Indonesia) melalui:
+## What the project does
 
-1. **Upskilling Berbasis Kompetensi** - Kurikulum terstruktur dengan asesmen praktik & sertifikasi resmi (BNSP/Kemenaker)
-2. **Job Matching AI** - Algoritma pencocokan transparan berbasis skill, gaji, lokasi, bahasa, sertifikasi
-3. **Verifiable Credentials (W3C VC)** - Sertifikat blockchain tamper-proof, verifiable instan via QR code
-4. **Migration Checklist** - Panduan lengkap migrasi per negara: paspor, visa, medis, kontrak, asuransi, KBRI
-5. **Financial Literacy** - Kalkulator remittance, simulasi investasi, target tabungan, edukasi anti-penipuan
+SkillMatch helps workers and employers connect through a transparent, skill-first platform:
 
-## 🎯 SDGs Alignment
+- Worker upskilling and assessment tracks across practical job skills, languages, digital literacy, and migration readiness
+- Job matching based on skill level, salary expectations, location preferences, language requirements, certifications, and availability
+- Verifiable credentials (W3C-style credential issuance and verification) for skills and certifications
+- Migration checklist guidance for countries and work visa requirements
+- Financial literacy and remittance planning support
+- Employer tools for candidate review, job posting, and application management
+- A responsive, installable PWA experience for mobile and desktop use
 
-| SDG | Target | SkillMatch Contribution |
-|-----|--------|------------------------|
-| **8.5** | Decent work & equal pay | Job matching transparan, verifikasi skill objektif |
-| **8.8** | Protect labor rights | Migration checklist, legal aid, contract review |
-| **1.2** | Reduce poverty | Financial literacy, remittance optimization |
-| **5.1** | Gender equality | Khusus PMI: perlindungan, kesehatan reproduksi |
-| **10.7** | Safe migration | Checklist lengkap, embassy contacts, safe channels |
-| **4.4** | Skills for employment | Upskilling terstruktur, sertifikasi nasional |
+## Why it is useful
 
-## 🚀 Tech Stack
+This project addresses several pain points in the migrant worker journey:
 
-| Layer | Technology |
-|-------|------------|
-| **Framework** | Next.js 14 (App Router) + React 18 + TypeScript |
-| **Styling** | TailwindCSS + shadcn/ui (Radix UI) |
-| **Database** | PostgreSQL (Supabase/Neon) + Prisma ORM |
-| **Auth** | NextAuth.js v5 (Credentials, Google, WhatsApp OTP) |
-| **Cache/Queue** | Redis (Upstash) |
-| **VC/Crypto** | @digitalbazaar/vc, Ed25519, IPFS (Pinata) |
-| **Matching** | Custom TypeScript Algorithm (Explainable) |
-| **Deployment** | Vercel (Frontend + API) |
-| **Monitoring** | Sentry + Vercel Analytics |
-| **Testing** | Vitest (Unit) + Playwright (E2E) |
-| **PWA** | Workbox (Offline-first, Installable) |
+- It reduces information asymmetry between workers and employers
+- It gives workers a clear path to prove skills with assessment results and credentials
+- It supports safer migration decisions through structured checklists and legal/financial guidance
+- It improves hiring transparency with explainable match scoring
+- It creates a single platform for training, verification, hiring, and career support
 
-## 🏗️ Architecture
+## Core features
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      CLIENT (PWA)                           │
-│  Next.js 14 + React 18 + Tailwind + TypeScript             │
-│  • Service Worker (Workbox) untuk Offline-First            │
-│  • Web Speech API (Voice Input untuk low-literacy users)   │
-│  • IndexedDB (Dexie.js) untuk cache offline                │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ HTTPS / WebSocket
-┌──────────────────────────▼──────────────────────────────────┐
-│                   API GATEWAY (Next.js API Routes)          │
-│  • NextAuth.js (Email, Google, WhatsApp OTP)               │
-│  • Rate Limiting, Validation (Zod), Error Handling         │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-        ┌──────────────────┼──────────────────┐
-        ▼                  ▼                  ▼
-┌───────────────┐  ┌───────────────┐  ┌───────────────┐
-│  POSTGRESQL   │  │   REDIS       │  │   IPFS/       │
-│  (Supabase)   │  │   (Upstash)   │  │   ARWEAVE     │
-│               │  │               │  │   (VC Storage)│
-│ • Users       │  │ • Session     │  │               │
-│ • Skills      │  │ • Queue       │  │ • Verifiable  │
-│ • Jobs        │  │ • Cache       │  │   Credentials │
-│ • Assessments │  │ • Rate Limit  │  │ • Certificates│
-│ • Companies   │  │ • Real-time   │  │ • Proofs      │
-└───────────────┘  └───────────────┘  └───────────────┘
-```
+### Skills and assessments
 
-## 🔐 Verifiable Credentials (Innovation Highlight)
+- Skill catalog seeded for categories such as caregiving, construction, hospitality, manufacturing, language, financial literacy, and migration rights
+- Assessment attempts with passing scores and result tracking
+- Certification issuance based on verified outcomes
 
-SkillMatch menerbitkan **W3C Verifiable Credentials** berbasis **Ed25519Signature2020**:
+### Job matching
 
-```typescript
-// Contoh VC yang diterbitkan
-{
-  "@context": [
-    "https://www.w3.org/2018/credentials/v1",
-    "https://w3id.org/security/suites/ed25519-2020/v1"
-  ],
-  "type": ["VerifiableCredential", "SkillCertificate"],
-  "issuer": "did:web:skillmatch.id",
-  "credentialSubject": {
-    "id": "did:web:skillmatch.id:user:abc123",
-    "skill": {
-      "id": "CAREGIVING_ELDERLY",
-      "name": "Perawatan Lansia",
-      "level": "ADVANCED"
-    },
-    "assessment": { "score": 85, "passingScore": 70 },
-    "evidence": [{ "type": "AssessmentResult", "answersHash": "sha256..." }]
-  },
-  "proof": { /* Ed25519 cryptographic proof */ }
-}
+- Match scoring combines skill alignment, salary fit, location preference, language compatibility, certification bonus, and availability
+- Results are explainable and returned as categories such as strong, good, potential, or low match
+
+### Verifiable credentials
+
+- Credential generation and verification logic for worker certifications
+- QR/public verification flow for employers and agencies
+- Integration points for DID and Ed25519-style cryptographic signing support
+
+### Employer and dashboard workflows
+
+- Job posting and candidate listing flows
+- Application lifecycle tracking
+- Worker verification workflows and dashboards
+- Migration and finance dashboards for support tools
+
+### PWA and product experience
+
+- Service worker and installability support
+- Offline-first front-end patterns
+- Voice input and mobile-friendly UI components
+
+## Tech stack
+
+- Next.js 14 with App Router
+- React 18 and TypeScript
+- Tailwind CSS and Radix UI components
+- Prisma ORM with PostgreSQL
+- NextAuth.js for authentication
+- PostgreSQL database via Prisma
+- Vitest for unit tests and Playwright for E2E coverage
+- IPFS and VC-related crypto libraries for certificate handling
+
+## Repository structure
+
+```text
+.
+├── prisma/
+│   ├── schema.prisma
+│   ├── seed.ts
+│   └── migrations/
+├── public/
+├── scripts/
+├── src/
+│   ├── app/
+│   ├── components/
+│   ├── hooks/
+│   ├── lib/
+│   └── styles/
+├── .env.example
+├── next.config.js
+├── package.json
+├── postcss.config.js
+├── tailwind.config.ts
+├── tsconfig.json
+├── README.md
+└── README-backup.md
 ```
 
-**Keunggulan:**
-- ✅ Tamper-proof (kriptografis)
-- ✅ Verifiable offline (tidak butuh server pusat)
-- ✅ Privacy-preserving (selective disclosure)
-- ✅ Interoperable (standar W3C)
-- ✅ Revocable (status check real-time)
-
-## 🎯 Matching Algorithm (Transparent & Explainable)
-
-```
-Overall Score (100%) = 
-  Skill Match (40%)      // Level + verified + certification bonus
-+ Salary Match (20%)     // Overlap range USD-normalized
-+ Location Match (15%)   // Preferred country match
-+ Language Match (10%)   // Bahasa requirement match
-+ Cert Bonus (10%)       // VC ownership for required skills
-+ Availability (5%)      // Start date proximity
-```
-
-Output: `STRONG_MATCH` (≥85) | `GOOD_MATCH` (≥70) | `POTENTIAL_MATCH` (≥50) | `LOW_MATCH` (<50)
-
-## 📦 Getting Started
+## Getting started
 
 ### Prerequisites
-- Node.js 20+
-- PostgreSQL (local atau Supabase/Neon)
-- Redis (local atau Upstash)
-- Pinata account (IPFS)
 
-### Installation
+- Node.js 20+
+- PostgreSQL database
+- npm
+- Optional: Redis / Upstash for future cache or queue features
+- Optional: Google OAuth credentials and VC/IPFS secrets for full production functionality
+
+### 1) Install dependencies
 
 ```bash
-# Clone & install
-git clone https://github.com/yourusername/skillmatch.git
-cd skillmatch
+git clone https://github.com/gioaprilino/Skillmatch
+cd Skillmatch
 npm install
+```
 
-# Environment setup
+### 2) Configure environment variables
+
+Copy the sample environment file and adjust the values:
+
+```bash
 cp .env.example .env
-# Edit .env dengan credentials Anda
+```
 
-# Database setup
+Then update the following values in `.env`:
+
+```env
+DATABASE_URL="postgresql://postgres:password@localhost:5432/skillmatch?schema=public"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-super-secret-key-min-32-chars-change-in-production"
+GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+You can also configure the optional VC, OAuth, Redis, Pinata, and analytics variables defined in `.env.example`.
+
+### 3) Prepare the database
+
+```bash
 npx prisma generate
-npx prisma migrate dev --name init
-npx prisma db seed
+npx prisma db push
+npm run db:seed
+```
 
-# Development
+The seed script populates the skill catalog, demo users, and assessment data.
+
+### 4) Start the app
+
+```bash
 npm run dev
 ```
 
-### Environment Variables
+Then open:
 
-```env
-# Database
-DATABASE_URL="postgresql://user:pass@localhost:5432/skillmatch"
+- http://localhost:3000
 
-# NextAuth
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-32-char-secret"
+### Demo credentials
 
-# Email (Resend)
-EMAIL_SERVER_HOST="smtp.resend.com"
-EMAIL_SERVER_PORT="587"
-EMAIL_SERVER_USER="resend"
-EMAIL_SERVER_PASSWORD="re_xxx"
-EMAIL_FROM="SkillMatch <noreply@skillmatch.id>"
+After seeding, the project includes demo accounts such as:
 
-# WhatsApp OTP (Twilio)
-TWILIO_ACCOUNT_SID="ACxxx"
-TWILIO_AUTH_TOKEN="xxx"
-TWILIO_PHONE_NUMBER="+15551234567"
+- `worker@skillmatch.id` / `password123`
+- `employer@skillmatch.id` / `password123`
+- `test@gmail.com` / `password123`
 
-# Google OAuth
-GOOGLE_CLIENT_ID="xxx.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="GOCSPX-xxx"
-
-# Redis (Upstash)
-UPSTASH_REDIS_REST_URL="https://xxx.upstash.io"
-UPSTASH_REDIS_REST_TOKEN="xxx"
-
-# IPFS (Pinata)
-PINATA_JWT="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-PINATA_GATEWAY="https://gateway.pinata.cloud/ipfs/"
-
-# VC Keys (generate with: npx tsx scripts/generate-vc-keys.ts)
-VC_ISSUER_DID="did:web:skillmatch.id"
-VC_ISSUER_PRIVATE_KEY="base58-encoded-private-key"
-VC_ISSUER_PUBLIC_KEY="base58-encoded-public-key"
-```
-
-## 🧪 Testing
+## Available scripts
 
 ```bash
-# Unit tests
-npm run test
-
-# E2E tests
-npm run test:e2e
-
-# Type check
+npm run dev
+npm run build
+npm run start
+npm run lint
 npm run type-check
+npm run db:push
+npm run db:migrate
+npm run db:studio
+npm run db:seed
+npm run test
+npm run test:ui
+npm run test:e2e
+```
 
-# Lint
+## Testing
+
+Run the project checks locally:
+
+```bash
+npm run test
+npm run type-check
 npm run lint
 ```
 
-## 📱 PWA Features
+This project uses Vitest for unit testing and Playwright for browser-level verification.
 
-- **Offline-first**: Service Worker cache static assets & API responses
-- **Installable**: Add to home screen (Android/iOS)
-- **Background Sync**: Queue assessments/applications when offline
-- **Push Notifications**: Job matches, application updates, visa expiry
+## Authentication and roles
 
-## ♿ Accessibility (WCAG 2.1 AA)
+The app supports multiple roles and entry points:
 
-- Semantic HTML5
-- ARIA labels & roles
-- Keyboard navigation
-- Screen reader support (NVDA, JAWS, VoiceOver)
-- High contrast mode
-- Voice input (Web Speech API) for low-literacy users
-- Reduced motion support
+- `WORKER`
+- `EMPLOYER`
+- `ADMIN`
+- `VERIFIER`
 
-## 🌍 Internationalization
+Authentication includes:
 
-- Bahasa Indonesia (default)
-- English
-- Arabic (RTL support ready)
-- Malaysian
-- Chinese (Simplified)
-- Japanese
-- Korean
+- Credentials login
+- Google OAuth
+- Custom session fallback handling
 
-## 📊 Project Structure
+## Support and help
 
-```
-skillmatch/
-├── prisma/
-│   ├── schema.prisma          # Database schema
-│   └── seed.ts                # Seed data (skills, assessments)
-├── public/
-│   ├── manifest.json          # PWA manifest
-│   ├── sw.js                  # Service Worker
-│   └── icons/                 # PWA icons
-├── src/
-│   ├── app/                   # Next.js App Router
-│   │   ├── api/               # API Routes
-│   │   ├── auth/              # Auth pages
-│   │   ├── dashboard/         # Protected dashboard
-│   │   └── page.tsx           # Landing page
-│   ├── components/
-│   │   ├── ui/                # shadcn/ui components
-│   │   ├── dashboard/         # Dashboard components
-│   │   └── providers.tsx      # Theme, Toaster providers
-│   ├── lib/
-│   │   ├── prisma.ts          # Prisma client
-│   │   ├── auth.ts            # NextAuth config
-│   │   ├── matching.ts        # Matching algorithm
-│   │   ├── vc.ts              # Verifiable Credentials
-│   │   ├── ipfs.ts            # IPFS client
-│   │   └── utils.ts           # Helper functions
-│   ├── hooks/                 # Custom React hooks
-│   ├── types/                 # TypeScript types
-│   └── styles/                # Global styles
-├── .github/workflows/         # CI/CD
-└── tests/                     # Test files
-```
+If you need help, start with the following:
 
-## 🚀 Deployment
+- Review the app pages and API routes in `src/app/`
+- Inspect the database model in `prisma/schema.prisma`
+- Check the environment template in `.env.example`
+- Use GitHub Issues for bug reports and feature discussions
+- Use pull requests for code contributions
 
-### Vercel (Recommended)
+## Maintainers and contribution
 
-1. Connect GitHub repo to Vercel
-2. Add environment variables
-3. Deploy!
+This project is currently maintained through the repository itself. Contributions are welcome via pull requests and issue discussions.
 
-```bash
-# Manual deploy
-vercel --prod
-```
+For a contribution flow:
 
-### Docker
+1. Fork or branch from the repository
+2. Create a focused change
+3. Run the relevant validation commands
+4. Open a pull request with a clear summary
 
-```dockerfile
-# Dockerfile included in repo
-docker build -t skillmatch .
-docker run -p 3000:3000 skillmatch
-```
+## Notes
 
-## 📈 Roadmap (Post-Competition)
+This repository is actively shaped around a migrant-worker support use case and includes product features that are more ambitious than a basic starter app. The codebase is therefore best understood as a working prototype and a platform foundation rather than a minimal sample project.
 
-- [ ] Mobile App (React Native / Expo)
-- [ ] AI Career Coach (LLM-powered)
-- [ ] Employer API for HRIS integration
-- [ ] Government portal integration (BNP2TKI, Kemenaker)
-- [ ] Blockchain anchoring (Polygon/Arbitrum)
-- [ ] Offline desktop app (Tauri)
-- [ ] Multi-language voice assistant
+## Summary
 
-## 🤝 Contributing
-
-1. Fork repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
-## 👥 Team
-
-- **Project Lead**: [Your Name]
-- **Backend**: [Team Member]
-- **Frontend**: [Team Member]
-- **VC/Crypto**: [Team Member]
-- **UI/UX**: [Team Member]
-- **Advisor**: [Dosen Pembimbing]
-
-## 📞 Contact
-
-- **Email**: team@skillmatch.id
-- **Website**: https://skillmatch.id
-- **GitHub**: https://github.com/yourusername/skillmatch
-
----
-
-**Built with ❤️ for IWTC 2026 - Empowering Indonesian Migrant Workers through Technology**
+SkillMatch connects skills, credentials, jobs, and protection for migrant workers through a modern web platform. It aims to be practical, transparent, and useful for workers who need to improve their employability while staying secure and informed during migration and employment transitions.
