@@ -6,9 +6,7 @@ import { getTopMatches } from '@/lib/matching';
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const userId = session?.user?.id;
 
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
@@ -43,29 +41,25 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Calculate match scores for each job
-    const jobsWithMatch = await Promise.all(
-      jobs.map(async (job) => {
-        let matchScore: number | undefined;
-        let matchedSkills: { items: any[] } | undefined;
-        
-        try {
-          const match = await getTopMatches(session.user.id, 1).then(m => m.find(x => x.jobId === job.id));
-          if (match) {
-            matchScore = match.overallScore;
-            matchedSkills = { items: match.matchedSkills };
-          }
-        } catch {
-          // Ignore match calculation errors
-        }
+    // Calculate match scores for all jobs at once if logged in
+    let matchMap = new Map();
+    if (userId) {
+      try {
+        const matches = await getTopMatches(userId, 50);
+        matchMap = new Map(matches.map((m) => [m.jobId, m]));
+      } catch (err) {
+        console.warn('Matching calculation error:', err);
+      }
+    }
 
-        return {
-          ...job,
-          matchScore,
-          matchedSkills,
-        };
-      })
-    );
+    const jobsWithMatch = jobs.map((job) => {
+      const match = matchMap.get(job.id);
+      return {
+        ...job,
+        matchScore: match ? match.overallScore : undefined,
+        matchedSkills: match ? { items: match.matchedSkills } : undefined,
+      };
+    });
 
     return NextResponse.json({ data: jobsWithMatch });
   } catch (error) {
