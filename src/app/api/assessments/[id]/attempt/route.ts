@@ -38,18 +38,32 @@ export async function POST(
       return NextResponse.json({ error: 'Assessment not found' }, { status: 404 });
     }
 
-    const questions = assessment.questions as Array<{ id: string; correctAnswer: string; weight?: number }>;
+    const questions = assessment.questions as Array<{
+      id: string;
+      correctAnswer: string | number;
+      options?: string[];
+      weight?: number;
+    }>;
     let totalWeight = 0;
     let earnedWeight = 0;
 
     for (const q of questions) {
-      totalWeight += q.weight || 1;
+      const qWeight = q.weight || 10;
+      totalWeight += qWeight;
       const userAnswer = answers[q.id];
-      if (
-        userAnswer !== undefined &&
-        String(userAnswer).trim().toLowerCase() === String(q.correctAnswer).trim().toLowerCase()
-      ) {
-        earnedWeight += q.weight || 1;
+      if (userAnswer === undefined || userAnswer === null) continue;
+
+      const isMatchByIndex =
+        String(userAnswer).trim() === String(q.correctAnswer).trim();
+
+      const isMatchByText =
+        Array.isArray(q.options) &&
+        typeof q.correctAnswer === 'number' &&
+        q.options[q.correctAnswer] !== undefined &&
+        String(userAnswer).trim().toLowerCase() === String(q.options[q.correctAnswer]).trim().toLowerCase();
+
+      if (isMatchByIndex || isMatchByText) {
+        earnedWeight += qWeight;
       }
     }
 
