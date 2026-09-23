@@ -23,6 +23,26 @@ const nextConfig = {
       };
     }
 
+    // Exclude digitalbazaar + transitive deps from webpack bundling (server only)
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push(({ request }, callback) => {
+        const externals = [
+          '@digitalbazaar/vc',
+          '@digitalbazaar/http-client',
+          '@digitalbazaar/ed25519-signature-2020',
+          '@digitalbazaar/ed25519-verification-key-2020',
+          'jsonld',
+          'undici',
+          'ky',
+        ];
+        if (externals.some(pkg => request && (request === pkg || request.startsWith(pkg + '/')))) {
+          return callback(null, 'commonjs ' + request);
+        }
+        callback();
+      });
+    }
+
     return config;
   },
   images: {
