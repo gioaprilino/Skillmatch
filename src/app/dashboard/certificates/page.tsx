@@ -87,6 +87,26 @@ const DEFAULT_CERTIFICATES: CertificateItem[] = [
 export default function CertificatesWalletPage() {
   const [certificates, setCertificates] = useState<CertificateItem[]>(DEFAULT_CERTIFICATES);
   const [selectedCert, setSelectedCert] = useState<CertificateItem | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadCerts() {
+      try {
+        const res = await fetch('/api/certificates', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.data) && data.data.length > 0) {
+            setCertificates(data.data);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load certificates:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadCerts();
+  }, []);
 
   const handleDownloadVC = (cert: CertificateItem) => {
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(cert.vcData, null, 2));

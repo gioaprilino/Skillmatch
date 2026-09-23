@@ -11,6 +11,7 @@ import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton,
 import { Logo, NavItem } from '@/components/dashboard';
 import { Shield, LayoutDashboard, BookOpen, Briefcase, Award, Globe, PiggyBank, Users, Settings, LogOut, Menu, X, ChevronDown, FileText } from 'lucide-react';
 import { signOut } from '@/lib/auth-client';
+import { NotificationBell } from '@/components/notification-bell';
 
 interface DashboardLayoutClientProps {
   session: {
@@ -123,7 +124,8 @@ export default function DashboardLayoutClient({ session, children }: DashboardLa
 
           <div className="flex-1 lg:hidden" />
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">

@@ -21,6 +21,19 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+interface DynamicStat {
+  label: string;
+  value: string;
+  key: string;
+}
+
+interface DynamicActivity {
+  type: string;
+  title: string;
+  desc: string;
+  time: string;
+}
+
 interface DashboardClientProps {
   session: {
     user: {
@@ -28,20 +41,22 @@ interface DashboardClientProps {
       role: 'WORKER' | 'EMPLOYER' | 'ADMIN' | 'VERIFIER';
     };
   };
+  dynamicStats?: DynamicStat[] | null;
+  dynamicActivities?: DynamicActivity[] | null;
 }
 
 const workerStats = [
   { label: 'Skill Terverifikasi', value: '3', icon: Award, color: 'text-yellow-500', bg: 'bg-yellow-100' },
-  { label: 'Lowongan Tersimpan', value: '5', icon: Briefcase, color: 'text-blue-500', bg: 'bg-blue-100' },
-  { label: 'Asesmen Selesai', value: '2', icon: BookOpen, color: 'text-green-500', bg: 'bg-green-100' },
-  { label: 'Checklist Migrasi', value: '75%', icon: Globe, color: 'text-purple-500', bg: 'bg-purple-100' },
+  { label: 'Lamaran Terkirim', value: '5', icon: Briefcase, color: 'text-blue-500', bg: 'bg-blue-100' },
+  { label: 'Asesmen Lulus', value: '2', icon: BookOpen, color: 'text-green-500', bg: 'bg-green-100' },
+  { label: 'Sertifikat Digital (VC)', value: '2', icon: Globe, color: 'text-purple-500', bg: 'bg-purple-100' },
 ];
 
 const employerStats = [
   { label: 'Lowongan Aktif', value: '3', icon: Briefcase, color: 'text-blue-500', bg: 'bg-blue-100' },
   { label: 'Lamaran Masuk', value: '12', icon: Users, color: 'text-green-500', bg: 'bg-green-100' },
-  { label: 'Kandidat Diverifikasi', value: '8', icon: Award, color: 'text-yellow-500', bg: 'bg-yellow-100' },
-  { label: 'Tingkat Penempatan', value: '67%', icon: TrendingUp, color: 'text-purple-500', bg: 'bg-purple-100' },
+  { label: 'Tahap Seleksi', value: '8', icon: Award, color: 'text-yellow-500', bg: 'bg-yellow-100' },
+  { label: 'Kandidat Diterima', value: '4', icon: TrendingUp, color: 'text-purple-500', bg: 'bg-purple-100' },
 ];
 
 const workerActions = [
@@ -58,17 +73,37 @@ const employerActions = [
   { title: 'Profil Perusahaan', desc: 'Kelola brand employer & review', icon: LayoutDashboard, href: '/dashboard/employer/profile', color: 'bg-orange-500' },
 ];
 
-const recentActivity = [
+const defaultRecentActivity = [
   { type: 'assessment', title: 'Asesmen Caregiving Level 3', desc: 'Skor: 85% - LULUS', time: '2 jam lalu', icon: CheckCircle2, color: 'text-green-500' },
   { type: 'job', title: 'Lamaran: Perawat Lansia - Singapura', desc: 'Status: Screening', time: '1 hari lalu', icon: Briefcase, color: 'text-blue-500' },
   { type: 'certificate', title: 'Sertifikat Bahasa Inggris B1', desc: 'Verifiable Credential diterbitkan', time: '3 hari lalu', icon: Award, color: 'text-yellow-500' },
   { type: 'migration', title: 'Checklist Singapura: 75% selesai', desc: 'Visa & medis pending', time: '1 minggu lalu', icon: Globe, color: 'text-purple-500' },
 ];
 
-export default function DashboardClient({ session }: DashboardClientProps) {
+export default function DashboardClient({ session, dynamicStats, dynamicActivities }: DashboardClientProps) {
   const isEmployer = session.user.role === 'EMPLOYER';
-  const stats = isEmployer ? employerStats : workerStats;
+  
+  const baseStats = isEmployer ? employerStats : workerStats;
+  const stats = dynamicStats && dynamicStats.length === 4
+    ? dynamicStats.map((ds, idx) => ({
+        ...baseStats[idx],
+        label: ds.label,
+        value: ds.value,
+      }))
+    : baseStats;
+
   const actions = isEmployer ? employerActions : workerActions;
+  
+  const activities = (dynamicActivities && dynamicActivities.length > 0)
+    ? dynamicActivities.map((da) => ({
+        type: da.type,
+        title: da.title,
+        desc: da.desc,
+        time: da.time,
+        icon: da.type === 'assessment' ? CheckCircle2 : Briefcase,
+        color: da.type === 'assessment' ? 'text-green-500' : 'text-blue-500',
+      }))
+    : defaultRecentActivity;
 
   return (
     <div className="space-y-6">
@@ -144,7 +179,7 @@ export default function DashboardClient({ session }: DashboardClientProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity, i) => (
+              {activities.map((activity, i) => (
                 <div key={i} className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
                   <div className={cn('p-2 rounded-lg bg-muted', activity.color)}>
                     <activity.icon className="h-5 w-5" aria-hidden="true" />

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, XCircle, Award, Download, Share2, QrCode, Loader2, ArrowLeft, ArrowRight, Clock } from 'lucide-react';
-import { formatDate } from '@/lib/utils';
+import { cn, formatDate } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 interface AttemptResult {
@@ -347,5 +347,3 @@ async function shareVC(vcData: any) {
     copyToClipboard(JSON.stringify(vcData));
   }
 }
-
-import { cn } from '@/lib/utils';

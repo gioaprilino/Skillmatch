@@ -75,10 +75,13 @@ export async function DELETE(
       data: { status: 'WITHDRAWN' },
     });
 
-    // Decrement application count
+    // Update accurate application count
+    const activeCount = await prisma.jobApplication.count({
+      where: { jobId: application.jobId, status: { not: 'WITHDRAWN' } },
+    });
     await prisma.jobPost.update({
       where: { id: application.jobId },
-      data: { applicationCount: { decrement: 1 } },
+      data: { applicationCount: activeCount },
     });
 
     // Notify employer

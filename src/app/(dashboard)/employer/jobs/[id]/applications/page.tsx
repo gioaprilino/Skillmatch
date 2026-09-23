@@ -53,18 +53,12 @@ export default function EmployerApplicationsPage() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    if (status === 'authenticated') {
-      fetchData();
-    }
-  }, [status, jobId]);
-
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (isInitial = false) => {
+    if (isInitial) setLoading(true);
     try {
       const [jobRes, appsRes] = await Promise.all([
-        fetch(`/api/employer/jobs/${jobId}`),
-        fetch(`/api/employer/jobs/${jobId}/applications`),
+        fetch(`/api/employer/jobs/${jobId}`, { cache: 'no-store' }),
+        fetch(`/api/employer/jobs/${jobId}/applications`, { cache: 'no-store' }),
       ]);
       if (jobRes.ok) {
         const data = await jobRes.json();
@@ -75,11 +69,32 @@ export default function EmployerApplicationsPage() {
         setApplications(data.data);
       }
     } catch (err) {
-      toast.error('Gagal memuat data');
+      if (isInitial) toast.error('Gagal memuat data');
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchData(true);
+
+      const interval = setInterval(() => {
+        fetchData(false);
+      }, 6000);
+
+      const handleFocus = () => fetchData(false);
+      window.addEventListener('focus', handleFocus);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') fetchData(false);
+      });
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('focus', handleFocus);
+      };
+    }
+  }, [status, jobId]);
 
   const handleStatusChange = async (appId: string, newStatus: string) => {
     try {

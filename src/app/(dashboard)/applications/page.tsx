@@ -123,8 +123,8 @@ export default function ApplicationsPage() {
   const [filterTab, setFilterTab] = useState<'all' | 'in_progress' | 'interview' | 'accepted'>('all');
   const [search, setSearch] = useState('');
 
-  const fetchApplications = async () => {
-    setLoading(true);
+  const fetchApplications = async (isInitial = false) => {
+    if (isInitial) setLoading(true);
     try {
       const res = await fetch('/api/applications', { cache: 'no-store' });
       if (res.ok) {
@@ -136,12 +136,28 @@ export default function ApplicationsPage() {
     } catch (err) {
       console.error('Failed to fetch applications:', err);
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchApplications();
+    fetchApplications(true);
+
+    // Live real-time polling every 6 seconds
+    const interval = setInterval(() => {
+      fetchApplications(false);
+    }, 6000);
+
+    const handleFocus = () => fetchApplications(false);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') fetchApplications(false);
+    });
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const handleWithdraw = async (id: string) => {
@@ -202,7 +218,7 @@ export default function ApplicationsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={fetchApplications}
+              onClick={() => fetchApplications(true)}
               disabled={loading}
               className="gap-2 text-xs"
             >
