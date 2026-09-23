@@ -11,12 +11,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Shield, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Shield, Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const loginSchema = z.object({
-  email: z.string().email('Email tidak valid'),
-  password: z.string().min(6, 'Password minimal 6 karakter'),
+  email: z
+    .string()
+    .min(1, 'Email wajib diisi')
+    .email('Format email tidak valid'),
+  password: z
+    .string()
+    .min(1, 'Password wajib diisi')
+    .min(6, 'Password minimal 6 karakter'),
   remember: z.boolean().optional(),
 });
 
@@ -26,8 +33,10 @@ export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const registered = searchParams.get('registered') === 'true';
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -40,6 +49,7 @@ export default function LoginForm() {
 
   const onSubmit = async (data: LoginForm) => {
     setLoading(true);
+    setErrorMessage(null);
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -50,14 +60,16 @@ export default function LoginForm() {
       const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.error || 'Login gagal');
+        throw new Error(result.error || 'Email atau password salah');
       }
 
       toast.success('Selamat datang kembali!');
       router.push(callbackUrl);
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan');
+      const msg = error instanceof Error ? error.message : 'Terjadi kesalahan saat masuk';
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -75,7 +87,23 @@ export default function LoginForm() {
             Masuk untuk mengakses dashboard, lowongan, dan sertifikat Anda
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          {registered && (
+            <Alert className="border-emerald-500/50 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <AlertDescription>
+                Pendaftaran berhasil! Silakan masuk dengan akun yang baru Anda daftarkan.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {errorMessage && (
+            <Alert variant="destructive" className="animate-in fade-in-50 duration-200">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="font-medium">{errorMessage}</AlertDescription>
+            </Alert>
+          )}
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -85,10 +113,14 @@ export default function LoginForm() {
                   id="email"
                   type="email"
                   placeholder="anda@email.com"
-                  className="pl-10"
+                  className={`pl-10 ${errorMessage ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                   autoComplete="email"
-                  {...register('email')}
-                  aria-invalid={errors.email ? 'true' : 'false'}
+                  {...register('email', {
+                    onChange: () => {
+                      if (errorMessage) setErrorMessage(null);
+                    },
+                  })}
+                  aria-invalid={errors.email || !!errorMessage ? 'true' : 'false'}
                   aria-describedby={errors.email ? 'email-error' : undefined}
                 />
               </div>
@@ -115,10 +147,14 @@ export default function LoginForm() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
-                  className="pl-10 pr-10"
+                  className={`pl-10 pr-10 ${errorMessage ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                   autoComplete="current-password"
-                  {...register('password')}
-                  aria-invalid={errors.password ? 'true' : 'false'}
+                  {...register('password', {
+                    onChange: () => {
+                      if (errorMessage) setErrorMessage(null);
+                    },
+                  })}
+                  aria-invalid={errors.password || !!errorMessage ? 'true' : 'false'}
                   aria-describedby={errors.password ? 'password-error' : undefined}
                 />
                 <button

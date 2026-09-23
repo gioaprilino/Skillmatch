@@ -12,7 +12,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@radix-ui/react-radio-group';
-import { Shield, Mail, Lock, User, Building2, Loader2, CheckCircle2 } from 'lucide-react';
+import { Shield, Mail, Lock, User, Building2, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import toast from 'react-hot-toast';
 
 const registerSchema = z.object({
@@ -35,6 +36,7 @@ export default function RegisterForm() {
   const searchParams = useSearchParams();
   const defaultRole = (searchParams.get('role') as 'WORKER' | 'EMPLOYER') || 'WORKER';
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [step, setStep] = useState(1);
 
   const {
@@ -52,6 +54,7 @@ export default function RegisterForm() {
 
   const onSubmit = async (data: RegisterForm) => {
     setLoading(true);
+    setErrorMessage(null);
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
@@ -69,7 +72,9 @@ export default function RegisterForm() {
       router.push('/auth/login?registered=true');
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan');
+      const msg = error instanceof Error ? error.message : 'Terjadi kesalahan saat registrasi';
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -92,7 +97,14 @@ export default function RegisterForm() {
             Pilih peran Anda untuk memulai perjalanan karier
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          {errorMessage && (
+            <Alert variant="destructive" className="animate-in fade-in-50 duration-200">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="font-medium">{errorMessage}</AlertDescription>
+            </Alert>
+          )}
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
             <div>
               <Label className="block mb-3 font-medium">Saya ingin bergabung sebagai</Label>

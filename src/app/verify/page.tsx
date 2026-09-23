@@ -89,7 +89,7 @@ function VerifyContent() {
 
         {/* Input Card */}
         <Card className="border-border shadow-sm">
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 space-y-3">
             <div className="flex gap-2">
               <Input
                 placeholder="Masukkan Credential ID (urn:uuid:...)"
@@ -105,8 +105,45 @@ function VerifyContent() {
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Verifikasi'}
               </Button>
             </div>
+
+            {/* Quick Demo Helper */}
+            <div className="pt-1 flex flex-wrap items-center justify-between text-[11px] text-muted-foreground gap-2">
+              <span>Ingin mencoba fitur ini?</span>
+              <button
+                type="button"
+                onClick={() => {
+                  const demoId = 'urn:uuid:34938f3f-d481-45cb-8552-88dfbb84bec9';
+                  setCredentialId(demoId);
+                  verifyId(demoId);
+                }}
+                className="inline-flex items-center gap-1 font-medium text-primary hover:underline hover:text-primary/80 transition-colors"
+              >
+                <span>💡 Coba ID Contoh Terdaftar</span>
+              </button>
+            </div>
           </CardContent>
         </Card>
+
+        {/* Informative Guide Card */}
+        {!result && (
+          <div className="rounded-xl border border-dashed border-border bg-card/60 p-4 text-xs space-y-3">
+            <div className="font-semibold text-foreground flex items-center gap-2">
+              <QrCode className="h-4 w-4 text-primary" />
+              <span>Bagaimana Cara Kerja Verifikasi Ini?</span>
+            </div>
+            <ul className="space-y-1.5 text-muted-foreground list-disc list-inside">
+              <li>
+                <strong className="text-foreground">Dari Mana ID Berasal:</strong> Credential ID terbit secara otomatis saat pekerja lulus ujian asesmen di menu <span className="text-foreground font-medium">Pelatihan & Asesmen</span>.
+              </li>
+              <li>
+                <strong className="text-foreground">Pemindaian QR Code:</strong> Setiap sertifikat di menu <span className="text-foreground font-medium">Dashboard ➔ Sertifikat</span> memiliki QR code unik. Majikan cukup memindai QR code tersebut dan halaman ini akan otomatis memvalidasi keasliannya.
+              </li>
+              <li>
+                <strong className="text-foreground">Kriptografi Anti-Pemalsuan:</strong> Sistem memvalidasi tanda tangan digital <span className="font-mono text-foreground">Ed25519</span> berstandar W3C untuk memastikan data kompetensi tidak dimanipulasi.
+              </li>
+            </ul>
+          </div>
+        )}
 
         {/* Result Area */}
         {result && (

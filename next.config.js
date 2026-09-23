@@ -130,6 +130,34 @@ const nextConfig = {
         source: '/dashboard/verify',
         destination: '/dashboard/employer/verify',
       },
+      {
+        source: '/lowongan',
+        destination: '/jobs',
+      },
+      {
+        source: '/lowongan/:path*',
+        destination: '/jobs/:path*',
+      },
+      {
+        source: '/upskilling',
+        destination: '/upskilling/assessments',
+      },
+      {
+        source: '/credentials',
+        destination: '/verify',
+      },
+      {
+        source: '/migration',
+        destination: '/dashboard/migration',
+      },
+      {
+        source: '/finance',
+        destination: '/dashboard/finance',
+      },
+      {
+        source: '/community',
+        destination: '/dashboard/community',
+      },
     ];
   },
 };

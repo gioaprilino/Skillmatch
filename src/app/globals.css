@@ -61,6 +61,10 @@
   * {
     @apply border-border;
   }
+  html {
+    scroll-behavior: smooth !important;
+    scroll-padding-top: 5.5rem;
+  }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
@@ -123,4 +127,34 @@
 
 .pulse-ring {
   animation: pulse-ring 1.5s ease-out infinite;
+}
+
+@keyframes route-progress {
+  0% {
+    width: 0%;
+    margin-left: 0%;
+  }
+  50% {
+    width: 65%;
+    margin-left: 20%;
+  }
+  100% {
+    width: 100%;
+    margin-left: 100%;
+  }
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: page-fade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

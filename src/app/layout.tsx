@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/providers';
 import { PWARegistration } from '@/components/pwa-registration';
+import { NavigationProgressBar } from '@/components/navigation-progress';
 import { auth } from '@/lib/auth';
 
 const inter = Inter({
@@ -82,7 +83,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="id" className="scroll-smooth" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -92,6 +93,7 @@ export default async function RootLayout({
           Lewati ke konten utama
         </a>
         <Providers session={session}>
+          <NavigationProgressBar />
           {children}
           <PWARegistration />
         </Providers>
