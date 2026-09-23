@@ -5,9 +5,7 @@ import { prisma } from '@/lib/prisma';
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+
 
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
@@ -15,7 +13,9 @@ export async function GET(request: NextRequest) {
 
     const where: any = { isActive: true };
     if (skillId) where.skillId = skillId;
-    if (category) where.skill = { category };
+    if (category && category !== 'all') {
+      where.skill = { category: category as any };
+    }
 
     const assessments = await prisma.assessment.findMany({
       where,
@@ -28,12 +28,16 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Get user's latest attempt for each assessment
-    const userAttempts = await prisma.assessmentAttempt.findMany({
-      where: { userId: session.user.id },
-      select: { assessmentId: true, score: true, passed: true, completedAt: true },
-      orderBy: { completedAt: 'desc' },
-    });
+    // Get user's latest attempt for each assessment if logged in
+    let userAttempts: any[] = [];
+    const userId = session?.user?.id;
+    if (userId) {
+      userAttempts = await prisma.assessmentAttempt.findMany({
+        where: { userId },
+        select: { assessmentId: true, score: true, passed: true, completedAt: true },
+        orderBy: { completedAt: 'desc' },
+      });
+    }
 
     const attemptMap = new Map(userAttempts.map(a => [a.assessmentId, a]));
 
