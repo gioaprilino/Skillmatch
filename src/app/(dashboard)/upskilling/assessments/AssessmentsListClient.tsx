@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useSession } from '@/lib/auth-client';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -512,6 +513,7 @@ export default function AssessmentsListClient({
   initialAssessments: AssessmentItem[];
 }) {
   const router = useRouter();
+  const { data: session } = useSession();
   const [assessments, setAssessments] = useState<AssessmentItem[]>(initialAssessments);
   const [loading, setLoading] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('all');
@@ -596,13 +598,27 @@ export default function AssessmentsListClient({
       <div className="border-b border-border bg-card/60 backdrop-blur-md sticky top-0 z-30 px-4 py-3 sm:px-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link
-            href="/dashboard"
+            href={session?.user ? (session.user.role === 'EMPLOYER' ? '/dashboard/employer' : '/dashboard') : '/'}
             className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            Kembali ke Dashboard Utama
+            {session?.user ? 'Kembali ke Dashboard' : 'Kembali ke Beranda'}
           </Link>
           <div className="flex items-center gap-2">
+            {!session?.user && (
+              <div className="flex items-center gap-2 mr-1">
+                <Link href="/auth/login">
+                  <Button variant="ghost" size="sm" className="text-xs">
+                    Masuk
+                  </Button>
+                </Link>
+                <Link href="/auth/register">
+                  <Button size="sm" className="text-xs rounded-xl">
+                    Daftar
+                  </Button>
+                </Link>
+              </div>
+            )}
             <Button
               variant="outline"
               size="sm"
