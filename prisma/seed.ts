@@ -61,6 +61,27 @@ const skills = [
   // ENTREPRENEURSHIP
   { code: 'SMALL_BIZ_MGMT', name: 'Manajemen Usaha Kecil', nameEn: 'Small Business Mgmt', category: SkillCategory.ENTREPRENEURSHIP, description: 'Modal, bookkeeping, pemasaran, skala usaha', icon: '🏪' },
   { code: 'ONLINE_SELLING', name: 'Jualan Online', nameEn: 'Online Selling', category: SkillCategory.ENTREPRENEURSHIP, description: 'Tokopedia, Shopee, TikTok Shop, dropshipping', icon: '🛒' },
+
+  // MANUFACTURING
+  { code: 'CNC_OPERATOR', name: 'Operator Mesin CNC', nameEn: 'CNC Machine Operator', category: SkillCategory.MANUFACTURING, description: 'Pengoperasian mesin bubut/milling CNC, membaca blueprint teknik', icon: '⚙️' },
+  { code: 'ELECTRONIC_ASSEMBLY', name: 'Perakitan Komponen Elektronika', nameEn: 'Electronic Assembly', category: SkillCategory.MANUFACTURING, description: 'Soldering SMT/THT, perakitan papan sirkuit PCB & uji fungsional', icon: '🔌' },
+  { code: 'QUALITY_CONTROL', name: 'Quality Control Manufaktur', nameEn: 'QC Inspector', category: SkillCategory.MANUFACTURING, description: 'Inspeksi dimensi dengan jangka sorong/mikrometer & standar ISO', icon: '🔍' },
+
+  // AGRICULTURE
+  { code: 'HYDROPONIC_FARMING', name: 'Pertanian Hidroponik & Greenhouse', nameEn: 'Hydroponic Farming', category: SkillCategory.AGRICULTURE, description: 'Manajemen nutrisi EC/pH, irigasi tetes, dan budidaya greenhouse modern', icon: '🌱' },
+  { code: 'LIVESTOCK_CARE', name: 'Peternakan & Manajemen Ternak', nameEn: 'Livestock Care', category: SkillCategory.AGRICULTURE, description: 'Pemeliharaan sapi/kambing, sanitasi kandang, dan pakan bernutrisi', icon: '🐄' },
+
+  // MARITIME
+  { code: 'SEAMAN_BASIC', name: 'Pelaut Dasar (BST STCW)', nameEn: 'Basic Safety Training (BST)', category: SkillCategory.MARITIME, description: 'Keselamatan kapal, pemadaman api, teknik bertahan hidup di laut (SOLAS)', icon: '⚓' },
+  { code: 'FISH_PROCESSING', name: 'Pengolahan Ikan & Hasil Laut', nameEn: 'Fish Processing', category: SkillCategory.MARITIME, description: 'Pemilahan, pemotongan, pembekuan cold-storage kapal penangkap ikan', icon: '🐟' },
+
+  // PLANTATION
+  { code: 'PALM_OIL_HARVEST', name: 'Pemanenan Kelapa Sawit', nameEn: 'Palm Oil Harvesting', category: SkillCategory.PLANTATION, description: 'Pemanenan tandan buah segar (TBS), pemangkasan pelepah, K3 kebun', icon: '🌴' },
+  { code: 'RUBBER_TAPPING', name: 'Penyadapan Karet', nameEn: 'Rubber Tapping', category: SkillCategory.PLANTATION, description: 'Teknik toreh kulit pohon karet, perawatan bidang sadap, pengumpulan lateks', icon: '🌲' },
+
+  // BEAUTY_WELLNESS
+  { code: 'SPA_MASSAGE', name: 'Terapis Spa & Refleksi', nameEn: 'Spa & Massage Therapist', category: SkillCategory.BEAUTY_WELLNESS, description: 'Pijat tradisional, akupresur relaksasi, aromaterapi & etika profesional', icon: '💆' },
+  { code: 'HAIRSTYLING', name: 'Tata Rias Rambut & Salon', nameEn: 'Hairstyling & Cosmetology', category: SkillCategory.BEAUTY_WELLNESS, description: 'Teknik potong rambut, pewarnaan, sanitasi alat salon & pelayanan pelanggan', icon: '💇' },
 ];
 
 const assessments = [
@@ -114,6 +135,89 @@ const assessments = [
       { id: 'q5', type: 'multiple_choice', question: 'PPE wajib las MIG/TIG?', options: ['Helm las, sarung tangan, baju lengan panjang, kacamata', 'Cukup helm las', 'Sarung tangan saja', 'Masker KN95'], correctAnswer: 0, weight: 10 },
       { id: 'q6', type: 'multiple_choice', question: 'Persiapan joint las butt weld?', options: ['Bersihkan karat/oli, V-groove 60-70°', 'Langsung las', 'Cat joint dulu', 'Panaskan joint'], correctAnswer: 0, weight: 15 },
       { id: 'q7', type: 'true_false', question: 'Las TIG tidak memerlukan gas shielding', options: ['Benar', 'Salah'], correctAnswer: 1, weight: 10 },
+    ],
+  },
+  {
+    skillCode: 'HOUSEKEEPING',
+    title: 'Asesmen Housekeeping Hotel Standar Internasional',
+    description: 'Tes kompetensi sanitasi kamar, penataan linen, chemical safety, dan standar hospitality',
+    durationMin: 35,
+    passingScore: 70,
+    questions: [
+      { id: 'q1', type: 'multiple_choice', question: 'Urutan pembersihan kamar tamu hotel (departure/check-out) yang tepat adalah?', options: ['Kamar mandi dulu, baru kamar tidur', 'Buka tirai/ventilasi, lepas linen kotor, bersihkan kamar tidur, lalu kamar mandi', 'Sapu lantai dulu sebelum merapikan tempat tidur', 'Semprot pengharum ruangan sebelum membersihkan'], correctAnswer: 1, weight: 10 },
+      { id: 'q2', type: 'multiple_choice', question: 'Teknik "Hospital Corner" pada perapihan tempat tidur memiliki sudut berapa derajat?', options: ['30°', '45°', '60°', '90°'], correctAnswer: 1, weight: 10 },
+      { id: 'q3', type: 'multiple_choice', question: 'Cairan pembersih kimia asam (acid cleaner) digunakan untuk membersihkan apa?', options: ['Kerak kapur dan noda urine di kloset', 'Kaca cermin jendela', 'Debu pada meja kayu', 'Noda karpet'], correctAnswer: 0, weight: 10 },
+      { id: 'q4', type: 'multiple_choice', question: 'Apa warna lap microfiber standar internasional untuk area sanitasi kloset/toilet bowl?', options: ['Biru (kaca/cermin)', 'Kuning (wastafel)', 'Merah (toilet bowl)', 'Hijau (food area)'], correctAnswer: 2, weight: 15 },
+      { id: 'q5', type: 'scenario', question: 'Tamu meninggalkan paspor dan dompet di atas meja setelah check-out. Prosedur apa yang harus dilakukan?', options: ['Simpan di saku trolley sampai shift selesai', 'Langsung serahkan ke supervisor/Security sesuai SOP Lost & Found', 'Tinggalkan di kamar sampai tamu kembali', 'Hubungi tamu via HP pribadi'], correctAnswer: 1, weight: 15 },
+      { id: 'q6', type: 'true_false', question: 'Linen yang bernoda darah atau cairan tubuh boleh dicuci bersamaan dengan linen biasa tanpa pemilahan.', options: ['Benar', 'Salah'], correctAnswer: 1, weight: 10 },
+      { id: 'q7', type: 'multiple_choice', question: 'Istilah status kamar "DND" dalam hotel berarti?', options: ['Departure Not Done', 'Do Not Disturb', 'Double No Deposit', 'Daily Net Dust'], correctAnswer: 1, weight: 10 },
+      { id: 'q8', type: 'multiple_choice', question: 'Berapa jarak minimum trolley housekeeping diletakkan dari pintu kamar tamu?', options: ['Menempel di depan pintu', 'Di depan pintu menghadap ke koridor tanpa menghalangi jalan', 'Di dalam kamar mandi tamu', 'Di lorong tangga darurat'], correctAnswer: 1, weight: 10 },
+      { id: 'q9', type: 'multiple_choice', question: 'Sebelum mengetuk pintu kamar tamu yang berpenghuni, apa yang harus diucapkan?', options: ['"Halo ada orang?"', '"Housekeeping, selamat pagi/siang"', '"Buka pintunya"', '"Mau bersih-bersih"'], correctAnswer: 1, weight: 10 },
+    ],
+  },
+  {
+    skillCode: 'COMPUTER_BASIC',
+    title: 'Asesmen Komputer & Produktivitas Digital',
+    description: 'Tes kemampuan Windows, pengolahan dokumen, email bisnis, dan keamanan siber dasar',
+    durationMin: 30,
+    passingScore: 70,
+    questions: [
+      { id: 'q1', type: 'multiple_choice', question: 'Kombinasi tombol keyboard untuk menyalin (copy) dan menempel (paste) di Windows adalah?', options: ['Ctrl + X dan Ctrl + Z', 'Ctrl + C dan Ctrl + V', 'Ctrl + A dan Ctrl + S', 'Alt + C dan Alt + P'], correctAnswer: 1, weight: 10 },
+      { id: 'q2', type: 'multiple_choice', question: 'Rumus spreadsheet untuk menjumlahkan angka dari sel A1 hingga A10 adalah?', options: ['=TOTAL(A1:A10)', '=SUM(A1:A10)', '=COUNT(A1:A10)', '=ADD(A1..A10)'], correctAnswer: 1, weight: 10 },
+      { id: 'q3', type: 'multiple_choice', question: 'Apa tanda utama pesan email adalah phishing/penipuan?', options: ['Email dikirim oleh atasan resmi perusahaan', 'Alamat pengirim mencurigakan, meminta password mendesak, dan lampiran .exe', 'Format tulisan rapi dengan tanda tangan resmi', 'Email memiliki subjek jelas'], correctAnswer: 1, weight: 15 },
+      { id: 'q4', type: 'multiple_choice', question: 'Format file standar yang tidak mudah diubah untuk mengirim resume/kontrak kerja adalah?', options: ['.txt', '.pdf', '.docx', '.bmp'], correctAnswer: 1, weight: 10 },
+      { id: 'q5', type: 'multiple_choice', question: 'Cara aman membuat password akun perbankan atau email adalah?', options: ['Gunakan tanggal lahir sendiri', 'Gunakan kombinasi minimal 12 karakter huruf besar, kecil, angka, dan simbol', 'Gunakan kata "password123"', 'Gunakan nama depan sama dengan username'], correctAnswer: 1, weight: 15 },
+      { id: 'q6', type: 'true_false', question: 'File yang sudah dihapus ke Recycle Bin masih bisa dipulihkan (restore) sebelum tempat sampah dikosongkan.', options: ['Benar', 'Salah'], correctAnswer: 0, weight: 10 },
+      { id: 'q7', type: 'multiple_choice', question: 'Fungsi "BCC" pada pengiriman email adalah?', options: ['Kirim ke semua orang secara terbuka', 'Kirim salinan tersembunyi tanpa terlihat oleh penerima lain', 'Batalkan pengiriman email', 'Kunci email dengan password'], correctAnswer: 1, weight: 15 },
+      { id: 'q8', type: 'multiple_choice', question: 'Cloud storage yang umum digunakan untuk backup data online meliputi?', options: ['Google Drive, OneDrive, Dropbox', 'VLC Media Player', 'Adobe Photoshop', 'Notepad'], correctAnswer: 0, weight: 15 },
+    ],
+  },
+  {
+    skillCode: 'BUDGETING',
+    title: 'Asesmen Literasi Keuangan & Perencanaan Anggaran',
+    description: 'Tes manajemen pendapatan migran, alokasi 40/35/25, remittance, dan proteksi dari investasi bodong',
+    durationMin: 30,
+    passingScore: 70,
+    questions: [
+      { id: 'q1', type: 'multiple_choice', question: 'Berdasarkan formula anggaran SkillMatch, alokasi 40/35/25 mengatur persentase untuk apa?', options: ['40% belanja, 35% rekreasi, 25% makan', '40% kirim keluarga (remittance), 35% kebutuhan hidup lokal, 25% tabungan & modal usaha', '40% tabungan, 35% cicilan utang, 25% jajan', '40% asuransi, 35% pajak, 25% operasional'], correctAnswer: 1, weight: 15 },
+      { id: 'q2', type: 'multiple_choice', question: 'Sebelum mentransfer uang ke Indonesia, faktor penting apa yang wajib dicek?', options: ['Warna logo aplikasi', 'Nilai kurs tukar (exchange rate) dan biaya transfer flat/persentase', 'Jumlah follower media sosial penyedia jasa', 'Jam operasional bank Indonesia saja'], correctAnswer: 1, weight: 10 },
+      { id: 'q3', type: 'scenario', question: 'Seseorang menawarkan investasi dengan janji keuntungan 30% per bulan tanpa risiko. Keputusan tepat?', options: ['Langsung setor seluruh tabungan', 'Cek izin OJK/Bappebti; patut dicurigai sebagai skema Ponzi/investasi bodong', 'Ajak teman sekamar ikut setor', 'Pinjam uang rentenir untuk investasi'], correctAnswer: 1, weight: 15 },
+      { id: 'q4', type: 'multiple_choice', question: 'Berapa besaran ideal dana darurat (emergency fund) untuk pekerja kontrak migran?', options: ['Cukup untuk 1 hari makan', 'Setara 3 hingga 6 bulan biaya hidup dasar', 'Semua uang di rekening', 'Tidak perlu dana darurat jika sudah ada gaji'], correctAnswer: 1, weight: 15 },
+      { id: 'q5', type: 'multiple_choice', question: 'Instrumen tabungan aman di Indonesia yang dilindungi LPS (Lembaga Penjamin Simpanan) adalah?', options: ['Deposito & tabungan bank resmi terdaftar', 'Arisan berantai online', 'Pinjaman online ilegal', 'Kripto tanpa izin'], correctAnswer: 0, weight: 15 },
+      { id: 'q6', type: 'true_false', question: 'Mengirim uang melalui jasa perorangan tanpa izin resmi Bank Indonesia (jalur gelap) berisiko uang hilang dan melanggar hukum pencucian uang.', options: ['Benar', 'Salah'], correctAnswer: 0, weight: 15 },
+      { id: 'q7', type: 'multiple_choice', question: 'Tujuan utama memiliki rekening bank mandiri terpisah di Indonesia atas nama pekerja sendiri adalah?', options: ['Agar mudah dipinjamkan ke kerabat', 'Memastikan tabungan hasil kerja keras luar negeri tidak habis dan siap jadi modal usaha mandiri', 'Menghindari pemeriksaan imigrasi', 'Membayar denda'], correctAnswer: 1, weight: 15 },
+    ],
+  },
+  {
+    skillCode: 'CNC_OPERATOR',
+    title: 'Asesmen Operator Mesin CNC & Presisi',
+    description: 'Tes pemahaman kode G/M, pengukuran jangka sorong, safety mesin, dan kalibrasi tool',
+    durationMin: 40,
+    passingScore: 70,
+    questions: [
+      { id: 'q1', type: 'multiple_choice', question: 'Kode "G00" pada pemrograman mesin CNC berfungsi untuk?', options: ['Gerakan pemakanan lurus (Linear feed)', 'Gerakan gerak cepat tanpa pemakanan (Rapid traverse)', 'Gerakan melingkar searah jarum jam', 'Pergantian tool otomatis'], correctAnswer: 1, weight: 15 },
+      { id: 'q2', type: 'multiple_choice', question: 'Kode "M03" pada mesin milling/lathe CNC berarti?', options: ['Spindle berputar searah jarum jam (CW)', 'Spindle berhenti berputar', 'Coolant menyala', 'Program berakhir'], correctAnswer: 0, weight: 15 },
+      { id: 'q3', type: 'multiple_choice', question: 'Alat ukur presisi dengan ketelitian hingga 0.01 mm yang digunakan untuk mengukur diameter poros adalah?', options: ['Meteran gulung', 'Mikrometer luar (Outside micrometer)', 'Penggaris siku', 'Busur derajat'], correctAnswer: 1, weight: 15 },
+      { id: 'q4', type: 'multiple_choice', question: 'Tombol darurat berbentuk jamur warna merah pada mesin CNC disebut?', options: ['Power Switch', 'Emergency Stop (E-Stop)', 'Cycle Start', 'Feed Hold'], correctAnswer: 1, weight: 15 },
+      { id: 'q5', type: 'true_false', question: 'Operator mesin CNC dilarang memakai sarung tangan kain longgar saat mengoperasikan spindle yang berputar kencang.', options: ['Benar', 'Salah'], correctAnswer: 0, weight: 10 },
+      { id: 'q6', type: 'multiple_choice', question: 'Fungsi utama cairan pendingin (coolant) saat proses pemesinan CNC adalah?', options: ['Mewarnai benda kerja', 'Mereduksi panas, melumasi mata pahat, dan membersihkan serpihan geram (chips)', 'Menambah berat benda kerja', 'Memperlambat putaran motor'], correctAnswer: 1, weight: 15 },
+      { id: 'q7', type: 'scenario', question: 'Jika terdengar bunyi benturan keras (crash) saat mesin mulai memotong, tindakan pertama?', options: ['Ambil jangka sorong untuk mengukur', 'Segera tekan tombol Emergency Stop (E-Stop)', 'Naikkan feed rate', 'Matikan lampu ruangan'], correctAnswer: 1, weight: 15 },
+    ],
+  },
+  {
+    skillCode: 'SEAMAN_BASIC',
+    title: 'Asesmen Keselamatan Pelaut Dasar (BST STCW)',
+    description: 'Tes standar Basic Safety Training: Personal Survival Techniques, Fire Prevention, & First Aid',
+    durationMin: 35,
+    passingScore: 75,
+    questions: [
+      { id: 'q1', type: 'multiple_choice', question: 'Sinyal alarm darurat umum (General Emergency Alarm) di atas kapal adalah?', options: ['1 tiupan panjang', '7 tiupan pendek diikuti 1 tiupan panjang', '3 tiupan pendek terus menerus', 'Lonceng 10 detik'], correctAnswer: 1, weight: 15 },
+      { id: 'q2', type: 'multiple_choice', question: 'Saat melompat ke air menggunakan life jacket (baju pelampung), posisi tangan yang benar adalah?', options: ['Kedua tangan direntangkan ke samping', 'Satu tangan menutup hidung & mulut, tangan lain memegang bahu pelampung', 'Kedua tangan lurus di atas kepala', 'Kedua tangan di saku celana'], correctAnswer: 1, weight: 15 },
+      { id: 'q3', type: 'multiple_choice', question: 'Alat keselamatan pelampung penyelamat yang dapat mengembang otomatis di kapal disebut?', options: ['Inflatable Life Raft (ILR)', 'Kayak karet', 'Bano kano', 'Pelampung donat'], correctAnswer: 0, weight: 15 },
+      { id: 'q4', type: 'multiple_choice', question: 'Kebakaran kelas B di atas kapal (minyak bakar, solar, cat) paling efektif dipadamkan dengan alat pemadam apa?', options: ['Air jet bertekanan tinggi', 'Busa (Foam) atau Dry Chemical Powder', 'Kertas basah', 'Kipas angin'], correctAnswer: 1, weight: 15 },
+      { id: 'q5', type: 'true_false', question: 'Di atas sekoci atau rakit penyelamat, air laut boleh diminum langsung untuk mencegah dehidrasi.', options: ['Benar', 'Salah'], correctAnswer: 1, weight: 15 },
+      { id: 'q6', type: 'multiple_choice', question: 'Perangkat darurat yang memancarkan sinyal lokasi via satelit (COSPAS-SARSAT) saat kapal tenggelam adalah?', options: ['SART', 'EPIRB (Emergency Position Indicating Radio Beacon)', 'Walkie Talkie UHF', 'Radar Scanner'], correctAnswer: 1, weight: 15 },
+      { id: 'q7', type: 'multiple_choice', question: 'Istilah "Man Overboard" menandakan situasi darurat apa?', options: ['Kamar mesin banjir', 'Ada orang yang jatuh ke laut dari kapal', 'Muatan kargo bergeser', 'Jangkar tersangkut'], correctAnswer: 1, weight: 10 },
     ],
   },
 ];
@@ -244,7 +348,72 @@ async function main() {
       },
     });
   }
-  console.log(`✅ ${assessments.length} assessments seeded`);
+  console.log('✅ ${assessments.length} assessments seeded');
+
+  // Seed Demo Users
+  console.log('👥 Seeding demo users...');
+  const bcrypt = await import('bcryptjs');
+  const demoPasswordHash = await bcrypt.hash('password123', 10);
+
+  // 1. Demo Worker: Budi Santoso
+  await prisma.user.upsert({
+    where: { email: 'worker@skillmatch.id' },
+    update: {
+      passwordHash: demoPasswordHash,
+      role: 'WORKER',
+      name: 'Budi Santoso',
+      phone: '081234567890',
+      isActive: true,
+    },
+    create: {
+      email: 'worker@skillmatch.id',
+      passwordHash: demoPasswordHash,
+      role: 'WORKER',
+      name: 'Budi Santoso',
+      phone: '081234567890',
+      isActive: true,
+      language: 'id',
+    },
+  });
+
+  // 2. Demo Employer: Global Manpower
+  await prisma.user.upsert({
+    where: { email: 'employer@skillmatch.id' },
+    update: {
+      passwordHash: demoPasswordHash,
+      role: 'EMPLOYER',
+      name: 'PT Global Manpower Agency',
+      phone: '081298765432',
+      isActive: true,
+    },
+    create: {
+      email: 'employer@skillmatch.id',
+      passwordHash: demoPasswordHash,
+      role: 'EMPLOYER',
+      name: 'PT Global Manpower Agency',
+      phone: '081298765432',
+      isActive: true,
+      language: 'id',
+    },
+  });
+
+  // 3. User account test@gmail.com
+  await prisma.user.upsert({
+    where: { email: 'test@gmail.com' },
+    update: {
+      passwordHash: demoPasswordHash,
+      isActive: true,
+    },
+    create: {
+      email: 'test@gmail.com',
+      passwordHash: demoPasswordHash,
+      role: 'WORKER',
+      name: 'Mahardhika Yoanda',
+      isActive: true,
+      language: 'id',
+    },
+  });
+  console.log('✅ Demo users seeded (worker@skillmatch.id, employer@skillmatch.id, test@gmail.com / password123)');
 
   // Note: Migration checklists are created per-user when they select a target country
   console.log('🌍 Migration checklists configured (created per-user)');

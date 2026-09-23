@@ -118,7 +118,29 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json({ data: updated });
+    if (Array.isArray(body.skills)) {
+      await prisma.jobSkill.deleteMany({ where: { jobId: id } });
+      if (body.skills.length > 0) {
+        await prisma.jobSkill.createMany({
+          data: body.skills.map((s: any) => ({
+            jobId: id,
+            skillId: s.skillId,
+            level: s.level,
+            mandatory: s.mandatory ?? false,
+            weight: s.weight ?? 1,
+          })),
+        });
+      }
+    }
+
+    const updatedWithSkills = await prisma.jobPost.findUnique({
+      where: { id },
+      include: {
+        skills: { include: { skill: { select: { id: true, name: true, category: true } } } },
+      },
+    });
+
+    return NextResponse.json({ data: updatedWithSkills || updated });
   } catch (error) {
     console.error('Employer job PUT error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

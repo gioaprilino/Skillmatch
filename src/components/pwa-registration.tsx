@@ -34,12 +34,18 @@ export function PWARegistration() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // Register Service Worker
-    if ('serviceWorker' in navigator) {
+    // Register Service Worker only in production to avoid intercepting dev HMR
+    if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').then(
         (registration) => console.log('[PWA] SW registered:', registration.scope),
         (error) => console.log('[PWA] SW registration failed:', error)
       );
+    } else if (process.env.NODE_ENV === 'development' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const reg of registrations) {
+          reg.unregister();
+        }
+      });
     }
 
     return () => {

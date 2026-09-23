@@ -7,16 +7,16 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  let session = null;
   try {
-    const session = await auth();
-    
-    if (!session?.user) {
-      redirect('/auth/login');
-    }
-
-    return <DashboardLayoutClient session={session} children={children} />;
+    session = await auth();
   } catch {
-    // During static generation, auth() might fail
-    return <DashboardLayoutClient session={{ user: { name: '', email: '', role: 'WORKER', image: null } }} children={children} />;
+    // During build time or static export
   }
+
+  if (!session?.user) {
+    redirect('/auth/login');
+  }
+
+  return <DashboardLayoutClient session={session} children={children} />;
 }

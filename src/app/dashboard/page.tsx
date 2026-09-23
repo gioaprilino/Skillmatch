@@ -1,10 +1,4 @@
-import dynamic from 'next/dynamic';
-import { Suspense } from 'react';
-
-const DashboardClient = dynamic(
-  () => import('./DashboardClient').then(m => m.default),
-  { ssr: false, loading: () => <DashboardSkeleton /> }
-);
+import DashboardClient from './DashboardClient';
 
 function DashboardSkeleton() {
   return (

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import Link from 'next/link';
-import { Briefcase, Edit, Save, X, Loader2, ArrowLeft, Eye, Users, FileText, Calendar, DollarSign, MapPin, BriefcaseBusiness, Plus } from 'lucide-react';
+import { Briefcase, Edit, Save, X, Loader2, ArrowLeft, Eye, Users, FileText, Calendar, DollarSign, MapPin, Plus } from 'lucide-react';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import toast from 'react-hot-toast';
 

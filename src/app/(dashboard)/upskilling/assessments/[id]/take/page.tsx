@@ -106,8 +106,9 @@ export default function TakeAssessmentPage() {
           throw new Error(err.error || 'Submit failed');
         }
         const data = await res.json();
+        const attemptId = data.data?.attempt?.id || data.data?.id;
         toast.success(autoSubmit ? 'Waktu habis! Asesmen dikirim otomatis.' : 'Asesmen selesai!');
-        router.push(`/dashboard/upskilling/assessments/${assessmentId}/result?attempt=${data.data.attempt.id}`);
+        router.push(`/dashboard/upskilling/assessments/${assessmentId}/result?attempt=${attemptId}`);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Gagal mengirim jawaban');
         setSubmitting(false);

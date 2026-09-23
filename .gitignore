@@ -49,7 +49,4 @@ Thumbs.db
 # Logs
 logs
 *.log
-
-# PWA
-public/sw.js
-public/manifest.json
+

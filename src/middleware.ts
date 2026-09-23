@@ -6,17 +6,23 @@ export async function middleware(request: NextRequest) {
 
   const authToken = request.cookies.get('auth-token');
 
-  const publicPaths = ['/auth/login', '/auth/register', '/auth/forgot-password', '/'];
-  const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path));
+  const pathname = request.nextUrl.pathname;
+  const isPublicPath =
+    pathname === '/' ||
+    pathname.startsWith('/auth') ||
+    pathname.startsWith('/verify') ||
+    pathname.startsWith('/jobs') ||
+    pathname.startsWith('/upskilling');
 
-  if (!authToken && !isPublicPath) {
+  if (!authToken && !isPublicPath && pathname.startsWith('/dashboard')) {
     const loginUrl = new URL('/auth/login', request.url);
-    loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname);
+    loginUrl.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   if (authToken && request.nextUrl.pathname.startsWith('/auth/')) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    const callbackUrl = request.nextUrl.searchParams.get('callbackUrl') || '/dashboard';
+    return NextResponse.redirect(new URL(callbackUrl, request.url));
   }
 
   return response;

@@ -1,14 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/auth-client';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Briefcase, MapPin, DollarSign, Clock, Search, Filter, ChevronDown, ArrowRight, BriefcaseBusiness } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Clock, Search, Filter, ChevronDown, ArrowRight } from 'lucide-react';
 import { formatCurrency, getSkillLevelLabel } from '@/lib/utils';
+import { VoiceInput } from '@/components/voice-input';
 
 interface JobSkill {
   skillId: string;
@@ -121,10 +122,8 @@ export default function JobBoardPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      fetchJobs();
-    }
-  }, [status, search, filterCountry, filterWorkType]);
+    fetchJobs();
+  }, [search, filterCountry, filterWorkType]);
 
   const fetchJobs = async () => {
     setLoading(true);
@@ -196,18 +195,21 @@ export default function JobBoardPage() {
           <h1 className="text-2xl font-bold">Lowongan Pekerjaan</h1>
           <p className="text-muted-foreground">Temukan pekerjaan yang cocok dengan skill Anda</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <div className="relative flex-1">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-center">
+          <div className="relative flex-1 w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Cari posisi, perusahaan, deskripsi..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-ring"
+              className="w-full pl-10 pr-12 py-2 border rounded-lg focus:ring-2 focus:ring-ring"
             />
+            <div className="absolute right-1.5 top-1/2 -translate-y-1/2">
+              <VoiceInput onResult={(text) => setSearch(text)} className="h-7 w-7 p-1 border-none shadow-none" />
+            </div>
           </div>
-          <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="gap-2">
+          <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="gap-2 shrink-0">
             <Filter className="h-4 w-4" />
             Filter
             <ChevronDown className="h-4 w-4" />
@@ -287,7 +289,7 @@ export default function JobBoardPage() {
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg line-clamp-1">{job.title}</h3>
                         <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
-                          <BriefcaseBusiness className="h-3 w-3" />
+                          <Briefcase className="h-3 w-3" />
                           {job.employer.companyName || job.employer.name}
                         </p>
                       </div>

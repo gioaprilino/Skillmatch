@@ -41,7 +41,7 @@ export async function GET(
           id: attempt.id,
           score: attempt.score,
           passed: attempt.passed,
-          completedAt: attempt.completedAt.toISOString(),
+          completedAt: attempt.completedAt ? attempt.completedAt.toISOString() : null,
         },
         credential: credential ? { id: credential.credentialId, vcData: credential.vcData } : null,
       },

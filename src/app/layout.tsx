@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/providers';
 import { PWARegistration } from '@/components/pwa-registration';
+import { auth } from '@/lib/auth';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -17,6 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000'),
   title: {
     default: 'SkillMatch - Platform Upskilling & Lowongan Kerja untuk TKI',
     template: '%s | SkillMatch',
@@ -67,11 +69,18 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  let session = null;
+  try {
+    session = await auth();
+  } catch {
+    // Session fallback for static/offline render
+  }
+
   return (
     <html lang="id" suppressHydrationWarning>
       <head>
@@ -82,7 +91,7 @@ export default function RootLayout({
         <a href="#main-content" className="skip-link">
           Lewati ke konten utama
         </a>
-        <Providers>
+        <Providers session={session}>
           {children}
           <PWARegistration />
         </Providers>

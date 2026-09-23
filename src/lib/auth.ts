@@ -6,7 +6,7 @@ import { prisma } from './prisma';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+const nextAuthInstance = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [
     Google({
@@ -73,8 +73,53 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60,
   },
-  secret: process.env.NEXTAUTH_SECRET,
 });
+
+export const { handlers, signIn, signOut } = nextAuthInstance;
+const nextAuthAuth = nextAuthInstance.auth;
+
+export async function auth(...args: any[]): Promise<any> {
+  // 1. NextAuth session check
+  try {
+    const nextAuthSession = await (nextAuthAuth as any)(...args);
+    if (nextAuthSession?.user) {
+      return nextAuthSession;
+    }
+  } catch {
+    // Ignore
+  }
+
+  // 2. Custom auth-token cookie fallback (used by local login & registration)
+  try {
+    const { cookies } = await import('next/headers');
+    const { jwtVerify } = await import('jose');
+    const cookieStore = cookies();
+    const token = cookieStore.get('auth-token')?.value;
+
+    if (token) {
+      const JWT_SECRET = new TextEncoder().encode(
+        process.env.NEXTAUTH_SECRET || 'fallback-secret-change-in-production'
+      );
+      const { payload } = await jwtVerify(token, JWT_SECRET);
+      if (payload && payload.sub) {
+        return {
+          user: {
+            id: payload.sub as string,
+            email: payload.email as string,
+            name: payload.name as string,
+            role: payload.role as any,
+            image: (payload.image as string) || null,
+          },
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        };
+      }
+    }
+  } catch {
+    // Ignore when called outside request lifecycle
+  }
+
+  return null;
+}
 
 declare module 'next-auth' {
   interface User {

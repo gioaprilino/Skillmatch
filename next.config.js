@@ -1,25 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['undici', '@digitalbazaar/http-client', '@digitalbazaar/vc', 'jsonld', 'ky'],
   webpack: (config, { isServer }) => {
-    // Handle private class fields in undici
-    config.module.rules.push({
-      test: /\.js$/,
-      include: /node_modules\/(undici|@digitalbazaar|jsonld|ky)/,
-      use: {
-        loader: 'babel-loader',
-        options: {
-          presets: [
-            ['@babel/preset-env', { targets: { node: 'current' } }],
-          ],
-        },
-      },
-    });
-
     // Fix ESM modules
     config.resolve.extensionAlias = {
       '.js': ['.js', '.ts', '.tsx'],
+    };
+
+    const path = require('path');
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'next-auth/react': path.resolve(__dirname, 'src/lib/auth-client.tsx'),
     };
 
     // Handle ESM modules in jsonld
@@ -42,6 +33,15 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
+    serverComponentsExternalPackages: [
+      '@digitalbazaar/vc',
+      '@digitalbazaar/ed25519-signature-2020',
+      '@digitalbazaar/ed25519-verification-key-2020',
+      '@digitalbazaar/http-client',
+      'jsonld',
+      'undici',
+      'ky',
+    ],
   },
   async headers() {
     return [
@@ -71,8 +71,44 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/api/vc/:path*',
-        destination: '/api/credentials/:path*',
+        source: '/dashboard/jobs',
+        destination: '/jobs',
+      },
+      {
+        source: '/dashboard/jobs/:path*',
+        destination: '/jobs/:path*',
+      },
+      {
+        source: '/dashboard/upskilling',
+        destination: '/upskilling/assessments',
+      },
+      {
+        source: '/dashboard/upskilling/:path*',
+        destination: '/upskilling/:path*',
+      },
+      {
+        source: '/dashboard/applications',
+        destination: '/applications',
+      },
+      {
+        source: '/dashboard/applications/:path*',
+        destination: '/applications/:path*',
+      },
+      {
+        source: '/dashboard/employer/jobs',
+        destination: '/employer/jobs',
+      },
+      {
+        source: '/dashboard/employer/jobs/:path*',
+        destination: '/employer/jobs/:path*',
+      },
+      {
+        source: '/api/credentials/:path*',
+        destination: '/api/vc/:path*',
+      },
+      {
+        source: '/dashboard/verify',
+        destination: '/dashboard/employer/verify',
       },
     ];
   },

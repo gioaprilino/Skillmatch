@@ -9,8 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Logo, NavItem } from '@/components/dashboard';
-import { Shield, LayoutDashboard, BookOpen, Briefcase, Award, Globe, PiggyBank, Users, Settings, LogOut, Menu, X, ChevronDown } from 'lucide-react';
-import { signOut } from 'next-auth/react';
+import { Shield, LayoutDashboard, BookOpen, Briefcase, Award, Globe, PiggyBank, Users, Settings, LogOut, Menu, X, ChevronDown, FileText } from 'lucide-react';
+import { signOut } from '@/lib/auth-client';
 
 interface DashboardLayoutClientProps {
   session: {
@@ -28,6 +28,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Upskilling', href: '/dashboard/upskilling', icon: BookOpen },
   { name: 'Lowongan', href: '/dashboard/jobs', icon: Briefcase },
+  { name: 'Lamaran Saya', href: '/dashboard/applications', icon: FileText },
   { name: 'Sertifikat', href: '/dashboard/certificates', icon: Award },
   { name: 'Migrasi', href: '/dashboard/migration', icon: Globe },
   { name: 'Keuangan', href: '/dashboard/finance', icon: PiggyBank },
@@ -144,7 +145,7 @@ export default function DashboardLayoutClient({ session, children }: DashboardLa
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard/profile" onClick={() => signOut({ callbackUrl: '/auth/login' })}>
+                  <Link href="/dashboard/profile">
                     Profil
                   </Link>
                 </DropdownMenuItem>

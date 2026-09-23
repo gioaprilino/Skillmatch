@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -133,11 +133,11 @@ export default function NewJobPage() {
 
   const handleArrayAdd = (field: keyof typeof formData, value: string | object) => {
     if (typeof value === 'string' && !value.trim()) return;
-    setFormData(prev => ({ ...prev, [field]: [...prev[field], value] }));
+    setFormData(prev => ({ ...prev, [field]: [...(prev[field] as any[]), value] }));
   };
 
   const handleArrayRemove = (field: keyof typeof formData, index: number) => {
-    setFormData(prev => ({ ...prev, [field]: prev[field].filter((_, i) => i !== index) }));
+    setFormData(prev => ({ ...prev, [field]: (prev[field] as any[]).filter((_, i) => i !== index) }));
   };
 
   const addJobSkill = () => {
@@ -416,8 +416,8 @@ export default function NewJobPage() {
             <Label>Persyaratan Bahasa</Label>
             <div className="flex gap-2 mb-2">
               <Input value={newLanguage} onChange={e => setNewLanguage(e.target.value)} placeholder="Bahasa (contoh: English)" className="w-32" />
-              <Select value={newLanguageLevel} onValueChange={v => setNewLanguageLevel(v)} className="w-32">
-                <SelectTrigger><SelectValue placeholder="Level" /></SelectTrigger>
+              <Select value={newLanguageLevel} onValueChange={v => setNewLanguageLevel(v)}>
+                <SelectTrigger className="w-32"><SelectValue placeholder="Level" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="A1">A1 (Beginner)</SelectItem>
                   <SelectItem value="A2">A2 (Elementary)</SelectItem>

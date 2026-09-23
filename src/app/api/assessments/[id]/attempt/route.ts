@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { calculateMatch } from '@/lib/matching';
+import { getTopMatches } from '@/lib/matching';
 import { issueSkillCredential, loadIssuerKeyFromEnv, saveCredentialToDb } from '@/lib/vc';
 
 function mapScoreToLevel(score: number): string {
@@ -45,7 +45,10 @@ export async function POST(
     for (const q of questions) {
       totalWeight += q.weight || 1;
       const userAnswer = answers[q.id];
-      if (userAnswer !== undefined && userAnswer === q.correctAnswer) {
+      if (
+        userAnswer !== undefined &&
+        String(userAnswer).trim().toLowerCase() === String(q.correctAnswer).trim().toLowerCase()
+      ) {
         earnedWeight += q.weight || 1;
       }
     }
@@ -79,14 +82,16 @@ export async function POST(
           },
         },
         update: {
-          level,
-          lastAssessedAt: new Date(),
+          level: level as any,
+          verified: true,
+          verifiedAt: new Date(),
         },
         create: {
           userId: session.user.id,
           skillId: assessment.skill.id,
-          level,
-          lastAssessedAt: new Date(),
+          level: level as any,
+          verified: true,
+          verifiedAt: new Date(),
         },
       });
 
@@ -124,7 +129,7 @@ export async function POST(
 
       // Trigger job matching recalculation
       try {
-        await calculateMatch(session.user.id);
+        await getTopMatches(session.user.id);
       } catch {
         // Ignore matching errors
       }
@@ -133,6 +138,12 @@ export async function POST(
     return NextResponse.json({
       data: {
         ...attempt,
+        attempt: {
+          id: attempt.id,
+          score: attempt.score,
+          passed: attempt.passed,
+          completedAt: attempt.completedAt,
+        },
         assessment: { title: assessment.title, passingScore: assessment.passingScore },
         credential,
       },

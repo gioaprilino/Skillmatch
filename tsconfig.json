@@ -18,7 +18,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "next-auth/react": ["./src/lib/auth-client.tsx"]
     },
     "baseUrl": "."
   },

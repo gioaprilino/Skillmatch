@@ -9,6 +9,7 @@ export interface UserSkill {
 
 export interface JobSkill {
   skillId: string;
+  skillName?: string;
   level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
   mandatory: boolean;
   weight: number;
@@ -93,8 +94,9 @@ export async function calculateMatch(
     verified: s.verified,
   }));
 
-  const jobSkills: JobSkill[] = job.skills.map((s) => ({
+  const jobSkills: JobSkill[] = job.skills.map((s: any) => ({
     skillId: s.skillId,
+    skillName: s.skill?.name || s.skillId,
     level: s.level,
     mandatory: s.mandatory,
     weight: s.weight,
@@ -140,7 +142,7 @@ export async function calculateMatch(
   };
 }
 
-function calculateSkillMatch(
+export function calculateSkillMatch(
   userSkills: UserSkill[],
   jobSkills: JobSkill[],
   userCertifications: string[]
@@ -177,7 +179,7 @@ function calculateSkillMatch(
   return (matchedWeight / totalWeight) * 40;
 }
 
-function calculateSalaryMatch(
+export function calculateSalaryMatch(
   userMin: number | null,
   userMax: number | null,
   jobMin: number,
@@ -205,13 +207,13 @@ function calculateSalaryMatch(
   return overlapRatio * 20;
 }
 
-function calculateLocationMatch(preferredCountries: string[], jobCountry: string): number {
+export function calculateLocationMatch(preferredCountries: string[], jobCountry: string): number {
   if (preferredCountries.includes(jobCountry)) return 15;
   if (jobCountry === 'IDN') return 10;
   return 0;
 }
 
-function calculateLanguageMatch(
+export function calculateLanguageMatch(
   userLanguage: string,
   languageReq: { language: string; level: string }[] | null
 ): number {
@@ -224,7 +226,7 @@ function calculateLanguageMatch(
   return 0;
 }
 
-function calculateCertificationBonus(
+export function calculateCertificationBonus(
   userCertifications: string[],
   jobSkills: JobSkill[]
 ): number {
@@ -236,7 +238,7 @@ function calculateCertificationBonus(
   return ratio * 10;
 }
 
-function calculateAvailabilityMatch(availabilityDate: Date | null): number {
+export function calculateAvailabilityMatch(availabilityDate: Date | null): number {
   if (!availabilityDate) return 3;
   const daysUntil = Math.ceil(
     (new Date(availabilityDate).getTime() - Date.now()) / 86400000
@@ -262,7 +264,7 @@ function getMatchedSkills(
 
     return {
       skillId: jobSkill.skillId,
-      skillName: jobSkill.skillId,
+      skillName: jobSkill.skillName || jobSkill.skillId,
       userLevel: userSkill ? LEVEL_LABELS[userSkill.level] : 'Tidak ada',
       requiredLevel: LEVEL_LABELS[jobSkill.level],
       match: Math.min(100, Math.round(match * 100)),
@@ -284,7 +286,7 @@ function getSkillGaps(
     })
     .map((jobSkill) => ({
       skillId: jobSkill.skillId,
-      skillName: jobSkill.skillId,
+      skillName: jobSkill.skillName || jobSkill.skillId,
       requiredLevel: LEVEL_LABELS[jobSkill.level],
       userLevel: skillMap.get(jobSkill.skillId)
         ? LEVEL_LABELS[skillMap.get(jobSkill.skillId)!.level]
@@ -292,7 +294,7 @@ function getSkillGaps(
     }));
 }
 
-function getRecommendation(score: number): MatchResult['recommendation'] {
+export function getRecommendation(score: number): MatchResult['recommendation'] {
   if (score >= 85) return 'STRONG_MATCH';
   if (score >= 70) return 'GOOD_MATCH';
   if (score >= 50) return 'POTENTIAL_MATCH';
