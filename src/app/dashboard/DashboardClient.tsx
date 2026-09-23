@@ -34,6 +34,21 @@ interface DynamicActivity {
   time: string;
 }
 
+export interface SkillProgressItem {
+  skill: string;
+  level: number;
+  target: number;
+  levelName?: string;
+  verified?: boolean;
+}
+
+export interface RecommendationItem {
+  title: string;
+  match: number;
+  type: string;
+  href: string;
+}
+
 interface DashboardClientProps {
   session: {
     user: {
@@ -43,6 +58,8 @@ interface DashboardClientProps {
   };
   dynamicStats?: DynamicStat[] | null;
   dynamicActivities?: DynamicActivity[] | null;
+  dynamicSkills?: SkillProgressItem[] | null;
+  dynamicRecommendations?: RecommendationItem[] | null;
 }
 
 const workerStats = [
@@ -80,7 +97,13 @@ const defaultRecentActivity = [
   { type: 'migration', title: 'Checklist Singapura: 75% selesai', desc: 'Visa & medis pending', time: '1 minggu lalu', icon: Globe, color: 'text-purple-500' },
 ];
 
-export default function DashboardClient({ session, dynamicStats, dynamicActivities }: DashboardClientProps) {
+export default function DashboardClient({
+  session,
+  dynamicStats,
+  dynamicActivities,
+  dynamicSkills,
+  dynamicRecommendations,
+}: DashboardClientProps) {
   const isEmployer = session.user.role === 'EMPLOYER';
   
   const baseStats = isEmployer ? employerStats : workerStats;
@@ -104,6 +127,27 @@ export default function DashboardClient({ session, dynamicStats, dynamicActiviti
         color: da.type === 'assessment' ? 'text-green-500' : 'text-blue-500',
       }))
     : defaultRecentActivity;
+
+  const defaultSkills: SkillProgressItem[] = [
+    { skill: 'Caregiving & Perawatan Lansia', level: 85, target: 90, levelName: 'ADVANCED', verified: true },
+    { skill: 'Bahasa Komunikasi Kerja (Mandarin/Inggris)', level: 70, target: 80, levelName: 'INTERMEDIATE', verified: true },
+    { skill: 'Keselamatan & Kesehatan Kerja (K3)', level: 65, target: 75, levelName: 'INTERMEDIATE', verified: false },
+    { skill: 'First Aid & CPR Darurat', level: 90, target: 90, levelName: 'ADVANCED', verified: true },
+    { skill: 'Literasi Keuangan & Tabungan Mandiri', level: 50, target: 70, levelName: 'BEGINNER', verified: false },
+  ];
+
+  const skillsList = dynamicSkills && dynamicSkills.length > 0 ? dynamicSkills : defaultSkills;
+
+  const defaultRecommendations: RecommendationItem[] = [
+    { title: 'Asesmen: Caregiver Lansia & Pasien Demensia', match: 94, type: 'Sertifikasi', href: '/dashboard/upskilling' },
+    { title: 'Lowongan: Staf Housekeeping & Sanitasi Hotel - Singapura', match: 89, type: 'Lowongan', href: '/dashboard/jobs' },
+    { title: 'Checklist: Persyaratan Kerja & Dokumen Resmi Taiwan', match: 86, type: 'Migrasi', href: '/dashboard/migration' },
+    { title: 'Simulasi: Alokasi Gaji 40/35/25 & Kalkulator Remittance', match: 82, type: 'Keuangan', href: '/dashboard/finance' },
+  ];
+
+  const recommendationsList = dynamicRecommendations && dynamicRecommendations.length > 0
+    ? dynamicRecommendations
+    : defaultRecommendations;
 
   return (
     <div className="space-y-6">
@@ -198,21 +242,30 @@ export default function DashboardClient({ session, dynamicStats, dynamicActiviti
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Progres Skill</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Progres Skill & Kompetensi</CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">Pemetaan keahlian berbasis uji kompetensi BNSP & W3C VC</p>
+            </div>
+            <Button variant="ghost" size="sm" asChild className="text-xs">
+              <Link href="/dashboard/upskilling">
+                Ikuti Asesmen <ArrowRight className="ml-1 h-3 w-3" />
+              </Link>
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            {[
-              { skill: 'Caregiving Lansia', level: 75, target: 80, color: 'bg-blue-500' },
-              { skill: 'Bahasa Inggris', level: 60, target: 70, color: 'bg-green-500' },
-              { skill: 'Perawatan Demensia', level: 40, target: 60, color: 'bg-purple-500' },
-              { skill: 'First Aid & CPR', level: 90, target: 90, color: 'bg-orange-500' },
-              { skill: 'Nutrisi Lansia', level: 30, target: 50, color: 'bg-red-500' },
-            ].map((item, i) => (
-              <div key={i} className="space-y-1">
+            {skillsList.map((item, i) => (
+              <div key={i} className="space-y-1.5">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">{item.skill}</span>
-                  <span className="text-muted-foreground">{item.level}% / {item.target}%</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{item.skill}</span>
+                    {item.verified && (
+                      <Badge variant="outline" className="text-[10px] text-emerald-500 border-emerald-500/30 py-0 h-4">
+                        ✓ Terverifikasi VC
+                      </Badge>
+                    )}
+                  </div>
+                  <span className="text-muted-foreground text-xs font-medium">{item.level}% / {item.target}%</span>
                 </div>
                 <Progress value={item.level} className="h-2" />
               </div>
@@ -223,22 +276,22 @@ export default function DashboardClient({ session, dynamicStats, dynamicActiviti
         <Card>
           <CardHeader>
             <CardTitle>Rekomendasi untuk Anda</CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">Peluang kerja & peningkatan kompetensi terkurasi</p>
           </CardHeader>
           <CardContent className="space-y-3">
-            {[
-              { title: 'Asesmen: Perawatan Demensia Lanjutan', match: 92, type: 'Assessment' },
-              { title: 'Lowongan: Senior Caregiver - Jepang', match: 88, type: 'Job' },
-              { title: 'Kursus: Nutrisi Khusus Lansia', match: 85, type: 'Course' },
-              { title: 'Webinar: Hak TKI di Negara Tujuan', match: 80, type: 'Event' },
-            ].map((rec, i) => (
-              <div key={i} className="p-3 rounded-lg border hover:bg-accent/50 transition-colors">
-                <div className="flex items-center justify-between mb-1">
-                  <Badge variant="outline" className="text-xs">{rec.type}</Badge>
-                  <span className="text-xs font-medium text-primary">{rec.match}% Match</span>
+            {recommendationsList.map((rec, i) => (
+              <Link key={i} href={rec.href} className="block group">
+                <div className="p-3 rounded-lg border border-border/80 hover:border-primary/60 hover:bg-accent/40 transition-all">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <Badge variant="outline" className="text-[11px] group-hover:bg-primary/10 transition-colors">
+                      {rec.type}
+                    </Badge>
+                    <span className="text-xs font-semibold text-primary">{rec.match}% Match</span>
+                  </div>
+                  <p className="text-sm font-medium group-hover:text-primary transition-colors line-clamp-1">{rec.title}</p>
+                  <Progress value={rec.match} className="h-1.5 mt-2.5" />
                 </div>
-                <p className="text-sm font-medium">{rec.title}</p>
-                <Progress value={rec.match} className="h-1.5 mt-2" />
-              </div>
+              </Link>
             ))}
           </CardContent>
         </Card>

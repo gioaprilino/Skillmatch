@@ -72,34 +72,58 @@ export default async function DashboardPage() {
         />
       );
     } else {
-      // Worker stats
-      const [verifiedSkills, totalApps, completedAssessments, certsCount, recentAttempts, recentApps] =
-        await Promise.all([
-          prisma.userSkill.count({
-            where: { userId, verified: true },
-          }),
-          prisma.jobApplication.count({
-            where: { userId },
-          }),
-          prisma.assessmentAttempt.count({
-            where: { userId, completedAt: { not: null }, passed: true },
-          }),
-          prisma.certification.count({
-            where: { userId },
-          }),
-          prisma.assessmentAttempt.findMany({
-            where: { userId },
-            take: 2,
-            orderBy: { startedAt: 'desc' },
-            include: { assessment: { select: { title: true } } },
-          }),
-          prisma.jobApplication.findMany({
-            where: { userId },
-            take: 2,
-            orderBy: { appliedAt: 'desc' },
-            include: { job: { select: { title: true, country: true } } },
-          }),
-        ]);
+      // Worker stats & dynamic data
+      const [
+        verifiedSkills,
+        totalApps,
+        completedAssessments,
+        certsCount,
+        recentAttempts,
+        recentApps,
+        userSkillsList,
+        openJobs,
+        availableAssessments,
+      ] = await Promise.all([
+        prisma.userSkill.count({
+          where: { userId, verified: true },
+        }),
+        prisma.jobApplication.count({
+          where: { userId },
+        }),
+        prisma.assessmentAttempt.count({
+          where: { userId, completedAt: { not: null }, passed: true },
+        }),
+        prisma.certification.count({
+          where: { userId },
+        }),
+        prisma.assessmentAttempt.findMany({
+          where: { userId },
+          take: 2,
+          orderBy: { startedAt: 'desc' },
+          include: { assessment: { select: { title: true } } },
+        }),
+        prisma.jobApplication.findMany({
+          where: { userId },
+          take: 2,
+          orderBy: { appliedAt: 'desc' },
+          include: { job: { select: { title: true, country: true } } },
+        }),
+        prisma.userSkill.findMany({
+          where: { userId },
+          take: 5,
+          include: { skill: { select: { name: true } } },
+        }),
+        prisma.jobPost.findMany({
+          where: { status: 'PUBLISHED' },
+          take: 2,
+          orderBy: { publishedAt: 'desc' },
+          select: { id: true, title: true, country: true },
+        }),
+        prisma.assessment.findMany({
+          take: 2,
+          select: { id: true, title: true },
+        }),
+      ]);
 
       const dynamicStats = [
         { label: 'Skill Terverifikasi', value: String(verifiedSkills), key: 'skills' },
@@ -139,11 +163,57 @@ export default async function DashboardPage() {
         });
       }
 
+      // Convert userSkills to progress items
+      const levelPercentMap: Record<string, number> = {
+        BEGINNER: 40,
+        INTERMEDIATE: 70,
+        ADVANCED: 88,
+        EXPERT: 96,
+      };
+
+      const dynamicSkills = userSkillsList.length > 0
+        ? userSkillsList.map((us) => ({
+            skill: us.skill.name,
+            level: levelPercentMap[us.level] || 50,
+            target: 90,
+            levelName: us.level,
+            verified: us.verified,
+          }))
+        : null;
+
+      // Build real recommendations
+      const dynamicRecommendations: Array<{
+        title: string;
+        match: number;
+        type: string;
+        href: string;
+      }> = [];
+
+      for (const job of openJobs) {
+        dynamicRecommendations.push({
+          title: `Lowongan: ${job.title} (${job.country})`,
+          match: 88,
+          type: 'Lowongan',
+          href: `/dashboard/jobs?id=${job.id}`,
+        });
+      }
+
+      for (const ass of availableAssessments) {
+        dynamicRecommendations.push({
+          title: `Asesmen: ${ass.title}`,
+          match: 92,
+          type: 'Sertifikasi',
+          href: `/dashboard/upskilling`,
+        });
+      }
+
       return (
         <DashboardClient
           session={session}
           dynamicStats={dynamicStats}
           dynamicActivities={dynamicActivities}
+          dynamicSkills={dynamicSkills}
+          dynamicRecommendations={dynamicRecommendations.length > 0 ? dynamicRecommendations : null}
         />
       );
     }

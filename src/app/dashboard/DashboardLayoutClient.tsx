@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Logo, NavItem } from '@/components/dashboard';
-import { Shield, LayoutDashboard, BookOpen, Briefcase, Award, Globe, PiggyBank, Users, Settings, LogOut, Menu, X, ChevronDown, FileText } from 'lucide-react';
+import { Shield, LayoutDashboard, BookOpen, Briefcase, Award, Globe, PiggyBank, Users, Settings, LogOut, Menu, X, ChevronDown, FileText, PhoneCall, LifeBuoy } from 'lucide-react';
 import { signOut } from '@/lib/auth-client';
 import { NotificationBell } from '@/components/notification-bell';
 
@@ -54,60 +54,99 @@ export default function DashboardLayoutClient({ session, children }: DashboardLa
   return (
     <div className="min-h-screen bg-background">
       <Sidebar>
-        <SidebarContent className="hidden lg:flex">
-          <SidebarHeader className="p-4">
-            <Logo />
-          </SidebarHeader>
-          <SidebarMenu>
-            {navItems.map(item => (
-              <SidebarMenuItem key={item.name}>
-                <SidebarMenuButton
-                  asChild
-                  className={cn(
-                    pathname === item.href && 'bg-primary/10 text-primary'
-                  )}
+        <SidebarContent className="hidden lg:flex flex-col justify-between h-full">
+          <div>
+            <SidebarHeader className="p-4">
+              <Logo />
+            </SidebarHeader>
+            <SidebarMenu>
+              {navItems.map(item => (
+                <SidebarMenuItem key={item.name}>
+                  <SidebarMenuButton
+                    asChild
+                    className={cn(
+                      pathname === item.href && 'bg-primary/10 text-primary'
+                    )}
+                  >
+                    <Link href={item.href}>
+                      <item.icon className="mr-3 h-5 w-5" aria-hidden="true" />
+                      {item.name}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </div>
+
+          {/* Emergency SOS Banner in Sidebar Footer for PMI Protection */}
+          {!isEmployer && (
+            <div className="p-3 border-t border-border/60">
+              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs space-y-2">
+                <div className="flex items-center gap-2 font-semibold text-destructive">
+                  <LifeBuoy className="h-4 w-4 shrink-0 animate-pulse" />
+                  <span>Hotline Darurat PMI</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Bantuan perlindungan KBRI & Kemlu RI 24 jam di luar negeri
+                </p>
+                <Link
+                  href="/dashboard/migration"
+                  className="flex items-center justify-center gap-1.5 w-full py-1.5 px-2 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 text-xs font-medium transition-colors"
                 >
-                  <Link href={item.href}>
-                    <item.icon className="mr-3 h-5 w-5" aria-hidden="true" />
-                    {item.name}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
+                  <PhoneCall className="h-3 w-3" />
+                  <span>Kontak & Hotline KBRI</span>
+                </Link>
+              </div>
+            </div>
+          )}
         </SidebarContent>
 
-        <SidebarContent className="lg:hidden fixed inset-0 z-50 flex flex-col bg-background border-r">
-          <SidebarHeader className="p-4 flex items-center justify-between">
-            <Logo />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSidebarOpen(false)}
-              aria-label="Tutup sidebar"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </SidebarHeader>
-          <SidebarMenu className="flex-1 overflow-y-auto">
-            {navItems.map(item => (
-              <SidebarMenuItem key={item.name}>
-                <SidebarMenuButton
-                  asChild
-                  className={cn(
-                    pathname === item.href && 'bg-primary/10 text-primary'
-                  )}
+        {sidebarOpen && (
+          <SidebarContent className="lg:hidden fixed inset-0 z-50 flex flex-col bg-background border-r">
+            <SidebarHeader className="p-4 flex items-center justify-between">
+              <Logo />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSidebarOpen(false)}
+                aria-label="Tutup sidebar"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </SidebarHeader>
+            <SidebarMenu className="flex-1 overflow-y-auto">
+              {navItems.map(item => (
+                <SidebarMenuItem key={item.name}>
+                  <SidebarMenuButton
+                    asChild
+                    className={cn(
+                      pathname === item.href && 'bg-primary/10 text-primary'
+                    )}
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <Link href={item.href}>
+                      <item.icon className="mr-3 h-5 w-5" aria-hidden="true" />
+                      {item.name}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+
+            {!isEmployer && (
+              <div className="p-4 border-t border-border mt-auto">
+                <Link
+                  href="/dashboard/migration"
                   onClick={() => setSidebarOpen(false)}
+                  className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-lg bg-destructive text-destructive-foreground text-xs font-semibold"
                 >
-                  <Link href={item.href}>
-                    <item.icon className="mr-3 h-5 w-5" aria-hidden="true" />
-                    {item.name}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarContent>
+                  <PhoneCall className="h-4 w-4" />
+                  <span>Hotline Bantuan Darurat PMI</span>
+                </Link>
+              </div>
+            )}
+          </SidebarContent>
+        )}
       </Sidebar>
 
       <div className="lg:pl-64 flex flex-col min-h-screen">
@@ -172,7 +211,7 @@ export default function DashboardLayoutClient({ session, children }: DashboardLa
         </main>
       </div>
 
-      {false && (
+      {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
