@@ -8,11 +8,9 @@ export async function GET(
 ) {
   try {
     const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const userId = session?.user?.id;
 
-    const { id } = await params;
+    const { id } = (await params) as { id: string };
 
     const assessment = await prisma.assessment.findUnique({
       where: { id, isActive: true },
@@ -35,12 +33,15 @@ export async function GET(
       weight: q.weight,
     }));
 
-    // Get user's latest attempt
-    const latestAttempt = await prisma.assessmentAttempt.findFirst({
-      where: { userId: session.user.id, assessmentId: id },
-      orderBy: { startedAt: 'desc' },
-      select: { id: true, score: true, passed: true, completedAt: true, answers: true },
-    });
+    // Get user's latest attempt if logged in
+    let latestAttempt = null;
+    if (userId) {
+      latestAttempt = await prisma.assessmentAttempt.findFirst({
+        where: { userId, assessmentId: id },
+        orderBy: { startedAt: 'desc' },
+        select: { id: true, score: true, passed: true, completedAt: true, answers: true },
+      });
+    }
 
     return NextResponse.json({
       data: {

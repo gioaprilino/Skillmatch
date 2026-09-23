@@ -21,7 +21,7 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = await params;
+    const { id } = (await params) as { id: string };
     const body = await request.json();
     const { answers, startedAt } = body;
 
