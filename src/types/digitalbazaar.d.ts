@@ -1,9 +1,9 @@
 declare module '@digitalbazaar/vc' {
   export const documentLoader: (url: string) => Promise<{ document: any; contextUrl: any }>;
-  export const vc: {
-    issue: (options: { credential: any; suite: any; documentLoader: any }) => Promise<{ credential: any }>;
-    verifyCredential: (options: { credential: any; suite: any; documentLoader: any; checkStatus?: any }) => Promise<{ verified: boolean }>;
-  };
+  export function issue(options: { credential: any; suite: any; documentLoader: any }): Promise<{ credential: any }>;
+  export function verifyCredential(options: { credential: any; suite: any; documentLoader: any; checkStatus?: any }): Promise<{ verified: boolean }>;
+  export function createPresentation(options: any): Promise<any>;
+  export function signPresentation(options: any): Promise<any>;
 }
 
 declare module '@digitalbazaar/ed25519-signature-2020' {
@@ -15,9 +15,11 @@ declare module '@digitalbazaar/ed25519-signature-2020' {
 declare module '@digitalbazaar/ed25519-verification-key-2020' {
   export class Ed25519VerificationKey2020 {
     static generate(): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string; id: string; controller: string; type: string }>;
-    static from(privateKeyMultibase: string): Ed25519VerificationKey2020;
+    static from(options: any): Ed25519VerificationKey2020;
     privateKeyMultibase: string;
     publicKeyMultibase: string;
+    id: string;
+    controller: string;
   }
 }
 

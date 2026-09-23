@@ -16,6 +16,7 @@ export interface SkillCredentialSubject {
     completedAt: string;
   };
   evidence: {
+    id?: string;
     type: 'AssessmentResult';
     assessmentId: string;
     attemptId: string;
@@ -52,11 +53,20 @@ export async function generateKeyPair(): Promise<{
 
 export async function loadIssuerKeyFromEnv(): Promise<any> {
   const privateKeyMultibase = process.env.VC_ISSUER_PRIVATE_KEY_MULTIBASE;
+  const publicKeyMultibase = process.env.VC_ISSUER_PUBLIC_KEY_MULTIBASE;
+  const issuerDid = process.env.VC_ISSUER_DID || 'did:web:skillmatch.id';
+
   if (!privateKeyMultibase) {
     throw new Error('VC_ISSUER_PRIVATE_KEY_MULTIBASE not set in environment');
   }
   const { Ed25519VerificationKey2020 } = await import('@digitalbazaar/ed25519-verification-key-2020');
-  return Ed25519VerificationKey2020.from(privateKeyMultibase);
+  return Ed25519VerificationKey2020.from({
+    id: `${issuerDid}#key-1`,
+    type: 'Ed25519VerificationKey2020',
+    controller: issuerDid,
+    publicKeyMultibase,
+    privateKeyMultibase,
+  } as any);
 }
 
 export async function issueSkillCredential(
@@ -81,7 +91,7 @@ export async function issueSkillCredential(
   issuerKey: any
 ): Promise<SkillCredential> {
   const { Ed25519Signature2020 } = await import('@digitalbazaar/ed25519-signature-2020');
-  const { vc } = await import('@digitalbazaar/vc');
+  const { issue } = await import('@digitalbazaar/vc');
 
   const credential: SkillCredential = {
     '@context': [
@@ -97,22 +107,23 @@ export async function issueSkillCredential(
     credentialSubject: {
       id: userDid,
       skill: {
-        id: skill.code,
+        id: `urn:skill:${skill.code}`,
         name: skill.name,
         category: skill.category,
         level: mapScoreToLevel(attempt.score),
       },
       assessment: {
-        id: assessment.id,
+        id: `urn:assessment:${assessment.id}`,
         score: attempt.score,
         passingScore: assessment.passingScore,
         completedAt: attempt.completedAt.toISOString(),
       },
       evidence: [
         {
+          id: `urn:attempt:${attempt.id}`,
           type: 'AssessmentResult',
-          assessmentId: assessment.id,
-          attemptId: attempt.id,
+          assessmentId: `urn:assessment:${assessment.id}`,
+          attemptId: `urn:attempt:${attempt.id}`,
           answersHash: await hashAnswers(attempt.answers),
         },
       ],
@@ -120,12 +131,12 @@ export async function issueSkillCredential(
   };
 
   const suite = new Ed25519Signature2020({ key: issuerKey });
-  const result = await vc.issue({
+  const result = await issue({
     credential,
     suite,
     documentLoader,
   });
-  return result.credential as SkillCredential;
+  return ((result as any).credential || result) as SkillCredential;
 }
 
 export async function hashAnswers(answers: Record<string, any>): Promise<string> {
@@ -149,10 +160,10 @@ export async function verifyCredential(credential: SkillCredential): Promise<{
   error?: string;
 }> {
   try {
-    const { vc } = await import('@digitalbazaar/vc');
+    const { verifyCredential: verifyVc } = await import('@digitalbazaar/vc');
     const { Ed25519Signature2020 } = await import('@digitalbazaar/ed25519-signature-2020');
     const suite = new Ed25519Signature2020();
-    const result = await vc.verifyCredential({
+    const result = await verifyVc({
       credential,
       suite,
       documentLoader,
@@ -180,13 +191,14 @@ export async function saveCredentialToDb(
   userId: string,
   skillId: string,
   credential: SkillCredential,
-  ipfsHash: string
+  ipfsHash?: string | null
 ): Promise<void> {
+  const hash = ipfsHash && ipfsHash.trim() ? ipfsHash.trim() : null;
   await prisma.certification.create({
     data: {
       userId,
       skillId,
-      issuer: 'SkillMatch',
+      issuer: 'SkillMatch & Standar BNSP RI',
       credentialId: credential.id,
       credentialType: 'VerifiableCredential',
       level: credential.credentialSubject.skill.level as any,
@@ -194,7 +206,7 @@ export async function saveCredentialToDb(
       expiresAt: credential.expirationDate ? new Date(credential.expirationDate) : null,
       status: 'VERIFIED',
       vcData: JSON.parse(JSON.stringify(credential)),
-      ipfsHash,
+      ipfsHash: hash,
     },
   });
 
@@ -203,7 +215,7 @@ export async function saveCredentialToDb(
       userId,
       vcType: 'SkillCertificate',
       vcJson: JSON.parse(JSON.stringify(credential)),
-      ipfsHash,
+      ipfsHash: hash,
       issuedAt: new Date(),
       expiresAt: credential.expirationDate ? new Date(credential.expirationDate) : null,
     },

@@ -45,7 +45,6 @@ const SKILL_CONTEXT = {
     score: 'https://skillmatch.id/terms/score',
     passingScore: 'https://skillmatch.id/terms/passingScore',
     completedAt: 'https://skillmatch.id/terms/completedAt',
-    evidence: 'https://skillmatch.id/terms/evidence',
     AssessmentResult: 'https://skillmatch.id/terms/AssessmentResult',
     assessmentId: 'https://skillmatch.id/terms/assessmentId',
     attemptId: 'https://skillmatch.id/terms/attemptId',
@@ -53,14 +52,51 @@ const SKILL_CONTEXT = {
   },
 };
 
+const DID_DOCUMENT = {
+  '@context': [
+    'https://www.w3.org/ns/did/v1',
+    'https://w3id.org/security/suites/ed25519-2020/v1'
+  ],
+  id: 'did:web:skillmatch.id',
+  verificationMethod: [
+    {
+      id: 'did:web:skillmatch.id#key-1',
+      type: 'Ed25519VerificationKey2020',
+      controller: 'did:web:skillmatch.id',
+      publicKeyMultibase: process.env.VC_ISSUER_PUBLIC_KEY_MULTIBASE || 'z6MkiZ5TciFcbLfJn2cKpHQTvq3TFGuyc7J8ARg2jGHx4Lwb',
+    }
+  ],
+  authentication: ['did:web:skillmatch.id#key-1'],
+  assertionMethod: ['did:web:skillmatch.id#key-1'],
+};
+
 CONTEXTS['https://skillmatch.id/contexts/skill-v1.jsonld'] = SKILL_CONTEXT;
+CONTEXTS['did:web:skillmatch.id'] = DID_DOCUMENT;
+CONTEXTS['did:web:skillmatch.id#key-1'] = DID_DOCUMENT.verificationMethod[0];
+CONTEXTS['https://skillmatch.id/.well-known/did.json'] = DID_DOCUMENT;
+CONTEXTS['https://www.w3.org/ns/did/v1'] = {
+  '@context': {
+    '@version': 1.1,
+    '@protected': true,
+    id: '@id',
+    type: '@type',
+    verificationMethod: { '@id': 'https://w3id.org/security#verificationMethod', '@type': '@id' },
+    authentication: { '@id': 'https://w3id.org/security#authenticationMethod', '@type': '@id' },
+    assertionMethod: { '@id': 'https://w3id.org/security#assertionMethod', '@type': '@id' },
+  }
+};
 
 export async function documentLoader(url: string): Promise<{ document: any; contextUrl: any }> {
   if (CONTEXTS[url]) {
     return { contextUrl: null, document: CONTEXTS[url] };
   }
+  if (url.startsWith('did:web:skillmatch.id')) {
+    if (url.includes('#key-1')) {
+      return { contextUrl: null, document: DID_DOCUMENT.verificationMethod[0] };
+    }
+    return { contextUrl: null, document: DID_DOCUMENT };
+  }
   // For any other URLs, we'll fail gracefully in development
-  // In production, you might want to fetch from a caching service
   throw new Error(`Context not found: ${url}. Add to CONTEXTS in vc-document-loader.ts`);
 }
 
